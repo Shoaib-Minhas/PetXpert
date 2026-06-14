@@ -1,0 +1,21 @@
+# Production Requirements
+# Install with: pip install -r requirements/production.txt
+
+# Base requirements
+-r base.txt
+
+# Production Server
+gunicorn>=21.0.0,<22.0.0
+whitenoise>=6.6.0,<7.0.0
+
+# Security
+django-sslserver>=0.22.0,<0.23.0
+
+# Monitoring & Logging
+sentry-sdk>=1.40.0,<2.0.0
+
+# Performance
+django-cache-url>=3.4.0,<4.0.0
+
+# Email (for production notifications)
+django-anymail>=10.0.0,<11.0.0

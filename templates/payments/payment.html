@@ -1,0 +1,180 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Payment - PetXpert{% endblock %}
+
+{% block page_title %}Complete Payment{% endblock %}
+{% block page_subtitle %}Secure payment for your appointment{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Back Button -->
+    <button onclick="history.back()" class="mb-6 flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors font-medium">
+        <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        Back
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Order Summary -->
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <h2 class="text-xl font-bold text-gray-900 font-hanken mb-6">Order Summary</h2>
+            
+            <div class="space-y-4">
+                <!-- Veterinarian Info -->
+                <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
+                    <div class="w-16 h-16 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
+                        {% if veterinarian.profile_image %}
+                            <img src="{{ veterinarian.profile_image.url }}" alt="{{ veterinarian.user.full_name }}" class="w-full h-full object-cover">
+                        {% else %}
+                            <div class="w-full h-full flex items-center justify-center text-gray-400">
+                                <i data-lucide="user" class="w-8 h-8"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-gray-900">Dr.{{ veterinarian.user.full_name|capfirst }}</h4>
+                        <p class="text-sm text-gray-500">{{ veterinarian.specialization|capfirst }}</p>
+                    </div>
+                </div>
+
+                <!-- Appointment Details -->
+                <div class="space-y-3">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Date</span>
+                        <span class="font-medium text-gray-900">{{ scheduled_at|date:"l, F d, Y" }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Time</span>
+                        <span class="font-medium text-gray-900">{{ scheduled_at|date:"g:i A" }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Duration</span>
+                        <span class="font-medium text-gray-900">{{ duration_minutes }} minutes</span>
+                    </div>
+                </div>
+
+                <!-- Price Breakdown -->
+                <div class="border-t border-gray-200 pt-4 space-y-3">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Consultation Fee</span>
+                        <span class="font-medium text-gray-900">PKR {{ consultation_fee|floatformat:0 }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Tax (5%)</span>
+                        <span class="font-medium text-gray-900">PKR {{ tax_amount|floatformat:0 }}</span>
+                    </div>
+                    <div class="border-t border-gray-200 pt-3 flex justify-between items-center">
+                        <span class="font-bold text-gray-900">Total</span>
+                        <span class="text-2xl font-bold text-blue-600" id="total-amount">PKR {{ total_amount|floatformat:0 }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Badges -->
+            <div class="mt-6 flex items-center justify-center gap-4 text-gray-500 text-sm">
+                <div class="flex items-center gap-1">
+                    <i data-lucide="shield-check" class="w-4 h-4"></i>
+                    <span>Secure</span>
+                </div>
+                <div class="flex items-center gap-1">
+                    <i data-lucide="credit-card" class="w-4 h-4"></i>
+                    <span>Stripe</span>
+                </div>
+                <div class="flex items-center gap-1">
+                    <i data-lucide="lock" class="w-4 h-4"></i>
+                    <span>Encrypted</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Action -->
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <h2 class="text-xl font-bold text-gray-900 font-hanken mb-6">Payment Method</h2>
+            
+            <div class="space-y-6">
+                <!-- Stripe Checkout Info -->
+                <div class="bg-blue-50 border border-blue-100 rounded-xl p-4">
+                    <div class="flex items-start gap-3">
+                        <i data-lucide="info" class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5"></i>
+                        <div>
+                            <p class="text-sm text-blue-900 font-medium">Secure Checkout</p>
+                            <p class="text-sm text-blue-700 mt-1">You will be redirected to Stripe's secure payment page to complete your payment. Your card details are never stored on our servers.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pay Button -->
+                <button onclick="proceedToPayment()" id="pay-button" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                    <span id="button-text">Pay Securely with Stripe</span>
+                    <i data-lucide="lock" class="w-5 h-5"></i>
+                </button>
+
+                <!-- Accepted Cards -->
+                <div class="text-center">
+                    <p class="text-sm text-gray-500 mb-3">Accepted Payment Methods</p>
+                    <div class="flex items-center justify-center gap-4 text-gray-400">
+                        <i data-lucide="credit-card" class="w-8 h-8"></i>
+                        <i data-lucide="bank-card" class="w-8 h-8"></i>
+                    </div>
+                </div>
+
+                <!-- Terms -->
+                <p class="text-xs text-gray-500 text-center">
+                    By proceeding, you agree to our Terms of Service and Privacy Policy. Payments are processed securely by Stripe.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Get Django template variables
+    const veterinarianId = "{{ veterinarian.id }}";
+    const petId = "{{ pet_id }}";
+    const scheduledAt = "{{ scheduled_at }}";
+    const durationMinutes = "{{ duration_minutes }}";
+    const reason = "{{ reason }}";
+
+    async function proceedToPayment() {
+        const payButton = document.getElementById('pay-button');
+        const buttonText = document.getElementById('button-text');
+        
+        payButton.disabled = true;
+        buttonText.textContent = 'Processing...';
+
+        try {
+            // Create checkout session
+            const response = await fetch('/api/payments/create-checkout-session/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('access_token')
+                },
+                body: JSON.stringify({
+                    veterinarian_id: veterinarianId,
+                    pet_id: petId,
+                    scheduled_at: scheduledAt,
+                    duration_minutes: durationMinutes,
+                    reason: reason
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.checkout_url) {
+                // Redirect to Stripe Hosted Checkout
+                window.location.href = data.checkout_url;
+            } else {
+                throw new Error(data.error || 'Failed to create checkout session');
+            }
+        } catch (error) {
+            alert('Failed to proceed to payment: ' + error.message);
+            payButton.disabled = false;
+            buttonText.textContent = 'Pay Securely with Stripe';
+        }
+    }
+</script>
+
+<script>
+    lucide.createIcons();
+</script>
+{% endblock %}

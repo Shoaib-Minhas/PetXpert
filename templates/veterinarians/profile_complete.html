@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Your Professional Profile - PetXpert</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --primary: #003fb1;
+            --background: #faf8ff;
+        }
+        body { font-family: 'Inter', sans-serif; background-color: var(--background); }
+        h1, h2, h3 { font-family: 'Hanken Grotesk', sans-serif; }
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background-color: #f9fafb;
+            border: 1px solid #f3f4f6;
+            border-radius: 0.75rem;
+            outline: none;
+            transition: all 0.2s;
+        }
+        .form-input:focus {
+            ring: 2px;
+            ring-color: var(--primary);
+            border-color: transparent;
+            background-color: white;
+            box-shadow: 0 0 0 2px rgba(0, 63, 177, 0.1);
+        }
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 py-12">
+    <div class="max-w-3xl w-full bg-white rounded-[2rem] shadow-2xl p-8 md:p-12">
+        <div class="text-center mb-10">
+            <div class="w-16 h-16 bg-blue-50 text-[var(--primary)] rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <i data-lucide="stethoscope" class="w-8 h-8"></i>
+            </div>
+            <h1 class="text-3xl font-bold text-gray-900">Professional Verification</h1>
+            <p class="text-gray-500 mt-2">All fields are strictly required for clinical verification.</p>
+        </div>
+
+        <form id="vetProfileForm" class="space-y-8">
+            <!-- Section 1: Personal Professional Info -->
+            <div class="space-y-6">
+                <h3 class="text-lg font-bold text-[var(--primary)] border-b border-blue-50 pb-2">Professional Credentials</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="form-label">License Number *</label>
+                        <input type="text" id="license_number" required class="form-input" placeholder="e.g. VET-12345678">
+                    </div>
+                    <div>
+                        <label class="form-label">Qualification *</label>
+                        <input type="text" id="qualification" required class="form-input" placeholder="e.g. DVM, PhD in Veterinary Medicine">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="form-label">Specialization *</label>
+                        <input type="text" id="specialization" required class="form-input" placeholder="e.g. Feline Cardiology, Surgery">
+                    </div>
+                    <div>
+                        <label class="form-label">Years of Experience *</label>
+                        <input type="number" id="years_experience" required min="0" class="form-input" placeholder="e.g. 10">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 2: Clinical Info -->
+            <div class="space-y-6">
+                <h3 class="text-lg font-bold text-[var(--primary)] border-b border-blue-50 pb-2">Clinic Details</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="form-label">Clinic Name *</label>
+                        <input type="text" id="clinic_name" required class="form-input" placeholder="e.g. City Pet Hospital">
+                    </div>
+                    <div>
+                        <label class="form-label">Phone Number *</label>
+                        <input type="tel" id="phone_number" required class="form-input" placeholder="e.g. +1 (555) 000-0000">
+                    </div>
+                </div>
+                <div>
+                    <label class="form-label">Clinic Address *</label>
+                    <textarea id="clinic_address" rows="2" required class="form-input resize-none" placeholder="Full street address of your primary clinic..."></textarea>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="form-label">Consultation Fee ($) *</label>
+                        <input type="number" id="consultation_fee" required min="0" step="0.01" class="form-input" placeholder="e.g. 75.00">
+                    </div>
+                    <div>
+                        <label class="form-label">City/Location *</label>
+                        <input type="text" id="location" required class="form-input" placeholder="e.g. New York, NY">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 3: Bio -->
+            <div class="space-y-6">
+                <h3 class="text-lg font-bold text-[var(--primary)] border-b border-blue-50 pb-2">Professional Bio</h3>
+                <div>
+                    <label class="form-label">Bio (Clinical Summary) *</label>
+                    <textarea id="bio" rows="4" required class="form-input resize-none" placeholder="Provide a detailed professional summary for pet owners..."></textarea>
+                </div>
+            </div>
+
+            <!-- Profile Image Upload -->
+            <div class="p-6 bg-blue-50 rounded-2xl border border-blue-100">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-[var(--primary)] relative overflow-hidden">
+                        <i data-lucide="image" class="w-6 h-6" id="imageIcon"></i>
+                        <img id="imagePreview" class="hidden w-full h-full object-cover">
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="font-bold text-gray-900">Profile Photo *</h4>
+                        <p class="text-xs text-gray-500 mb-2">A professional photo is required for clinical verification.</p>
+                        <input type="file" id="profile_image" accept="image/*" required class="text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200">
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" id="submitBtn" class="w-full bg-[var(--primary)] text-white py-4 rounded-xl font-bold text-lg hover:bg-blue-800 transition-all shadow-lg shadow-blue-100 flex items-center justify-center gap-2">
+                <span>Submit for Verification</span>
+                <i data-lucide="shield-check" class="w-5 h-5"></i>
+            </button>
+        </form>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // Check auth
+        const token = localStorage.getItem('access_token');
+        const user = JSON.parse(localStorage.getItem('user'));
+
+        if (!token || !user || user.role !== 'VETERINARIAN') {
+            window.location.href = '/signin/';
+        }
+
+        // Check if profile is already complete
+        async function checkProfileCompleteness() {
+            try {
+                const response = await fetch('/api/profile/vet/update/', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                if (response.ok) {
+                    const profile = await response.json();
+                    if (profile.license_number && profile.qualification && profile.specialization && profile.clinic_name && profile.profile_image) {
+                        window.location.href = '/veterinarians/';
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking profile:', error);
+            }
+        }
+        checkProfileCompleteness();
+
+        // Image preview
+        document.getElementById('profile_image').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('imagePreview').src = e.target.result;
+                    document.getElementById('imagePreview').classList.remove('hidden');
+                    document.getElementById('imageIcon').classList.add('hidden');
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        document.getElementById('vetProfileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Processing...';
+            lucide.createIcons();
+
+            const formData = new FormData();
+            formData.append('license_number', document.getElementById('license_number').value);
+            formData.append('qualification', document.getElementById('qualification').value);
+            formData.append('specialization', document.getElementById('specialization').value);
+            formData.append('years_experience', document.getElementById('years_experience').value);
+            formData.append('clinic_name', document.getElementById('clinic_name').value);
+            formData.append('phone_number', document.getElementById('phone_number').value);
+            formData.append('clinic_address', document.getElementById('clinic_address').value);
+            formData.append('consultation_fee', document.getElementById('consultation_fee').value);
+            formData.append('location', document.getElementById('location').value);
+            formData.append('bio', document.getElementById('bio').value);
+            
+            const imageFile = document.getElementById('profile_image').files[0];
+            if (imageFile) {
+                formData.append('profile_image', imageFile);
+            }
+
+            try {
+                const response = await fetch('/api/profile/vet/update/', {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+
+                if (response.ok) {
+                    alert('Profile submitted successfully! Your account is now pending clinical verification.');
+                    window.location.href = '/veterinarians/'; // Redirect to veterinarian services page
+                } else {
+                    const result = await response.json();
+                    let errorMsg = 'Failed to update profile.';
+                    if (result.license_number) errorMsg = 'License number already exists or is invalid.';
+                    else if (typeof result === 'object') errorMsg = Object.values(result).flat().join(' ');
+                    
+                    alert(errorMsg);
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<span>Submit for Verification</span><i data-lucide="shield-check" class="w-5 h-5"></i>';
+                    lucide.createIcons();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Connection error. Please try again.');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span>Submit for Verification</span><i data-lucide="shield-check" class="w-5 h-5"></i>';
+                lucide.createIcons();
+            }
+        });
+    </script>
+</body>
+</html>

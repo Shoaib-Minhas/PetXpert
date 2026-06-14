@@ -1,0 +1,380 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Veterinarian Services - PetXpert{% endblock %}
+
+{% block page_title %}Veterinarian Services{% endblock %}
+{% block page_subtitle %}Connect with verified clinical experts for your pet's care.{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <!-- Clinical Stats Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div class="bg-white p-6 rounded-[16px] border border-gray-100 card-shadow">
+            <div class="flex items-center gap-4 mb-3">
+                <div class="w-10 h-10 bg-blue-50 text-[var(--primary)] rounded-xl flex items-center justify-center">
+                    <i data-lucide="users" class="w-5 h-5"></i>
+                </div>
+                <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Verified Vets</span>
+            </div>
+            <div id="totalVets" class="text-3xl font-bold text-gray-900 font-hanken">0</div>
+            <div id="totalVetsSkeleton" class="h-8 bg-gray-200 rounded animate-pulse hidden"></div>
+            <div class="text-[10px] text-green-600 font-bold mt-2 flex items-center gap-1">
+                <i data-lucide="trending-up" class="w-3 h-3"></i> Active Network
+            </div>
+        </div>
+        <div class="bg-white p-6 rounded-[16px] border border-gray-100 card-shadow">
+            <div class="flex items-center gap-4 mb-3">
+                <div class="w-10 h-10 bg-teal-50 text-[var(--secondary)] rounded-xl flex items-center justify-center">
+                    <i data-lucide="message-square" class="w-5 h-5"></i>
+                </div>
+                <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Consultations</span>
+            </div>
+            <div id="totalConsultations" class="text-3xl font-bold text-gray-900 font-hanken">0</div>
+            <div id="totalConsultationsSkeleton" class="h-8 bg-gray-200 rounded animate-pulse hidden"></div>
+            <div class="text-[10px] text-gray-400 font-bold mt-2">Completed Sessions</div>
+        </div>
+        <div class="bg-white p-6 rounded-[16px] border border-gray-100 card-shadow">
+            <div class="flex items-center gap-4 mb-3">
+                <div class="w-10 h-10 bg-yellow-50 text-[var(--warm-accent)] rounded-xl flex items-center justify-center">
+                    <i data-lucide="star" class="w-5 h-5"></i>
+                </div>
+                <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Avg. Rating</span>
+            </div>
+            <div id="avgRating" class="text-3xl font-bold text-gray-900 font-hanken">0.0</div>
+            <div id="avgRatingSkeleton" class="h-8 bg-gray-200 rounded animate-pulse hidden"></div>
+            <div class="text-[10px] text-gray-400 font-bold mt-2">Client Satisfaction</div>
+        </div>
+        <div class="bg-white p-6 rounded-[16px] border border-gray-100 card-shadow">
+            <div class="flex items-center gap-4 mb-3">
+                <div class="w-10 h-10 bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center">
+                    <i data-lucide="stethoscope" class="w-5 h-5"></i>
+                </div>
+                <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Specialties</span>
+            </div>
+            <div id="totalSpecialties" class="text-3xl font-bold text-gray-900 font-hanken">0</div>
+            <div id="totalSpecialtiesSkeleton" class="h-8 bg-gray-200 rounded animate-pulse hidden"></div>
+            <div class="text-[10px] text-gray-400 font-bold mt-2">Expertise Areas</div>
+        </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="bg-white p-6 rounded-2xl border border-gray-100 card-shadow">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+                <label class="block text-xs font-bold text-gray-500 mb-2">Preferred Specialty</label>
+                <select id="specialtyFilter" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent text-sm">
+                    <option value="">All Specialties</option>
+                    <option value="General Practice">General Practice</option>
+                    <option value="Surgery">Surgery</option>
+                    <option value="Cardiology">Cardiology</option>
+                    <option value="Dermatology">Dermatology</option>
+                    <option value="Oncology">Oncology</option>
+                    <option value="Neurology">Neurology</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-500 mb-2">Minimum Rating</label>
+                <select id="ratingFilter" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent text-sm">
+                    <option value="">All Ratings</option>
+                    <option value="4.5">4.5+ Stars</option>
+                    <option value="4.0">4.0+ Stars</option>
+                    <option value="3.5">3.5+ Stars</option>
+                    <option value="3.0">3.0+ Stars</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-gray-500 mb-2">Location</label>
+                <input type="text" id="locationFilter" placeholder="Enter city or zip code" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent text-sm">
+            </div>
+            <div class="flex items-end">
+                <button onclick="applyFilters()" class="w-full bg-[var(--primary)] text-white py-3 rounded-xl font-bold text-sm hover:bg-blue-800 transition-all shadow-lg shadow-blue-100">
+                    Apply Filters
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Available Specialists Section -->
+    <div>
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900 font-hanken">Available Specialists</h2>
+                <p id="specialistsSubtitle" class="text-sm text-gray-500 mt-1">Showing <span id="filteredCount">0</span> veterinary experts in your area matching your criteria.</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-gray-500">Sort by:</span>
+                <select id="sortBy" onchange="applyFilters()" class="px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent text-sm font-bold">
+                    <option value="recommended">Recommended</option>
+                    <option value="rating">Highest Rated</option>
+                    <option value="experience">Most Experienced</option>
+                    <option value="reviews">Most Reviews</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="vetsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Vets will be loaded here dynamically -->
+            <div class="flex items-center justify-center p-12 bg-white rounded-2xl border border-gray-100 col-span-full">
+                <div class="flex flex-col items-center gap-4">
+                    <i data-lucide="loader-2" class="w-8 h-8 text-[var(--primary)] animate-spin"></i>
+                    <p class="text-sm text-gray-500 font-medium">Loading specialists...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let allVets = [];
+
+    async function loadVets() {
+        const vetsGrid = document.getElementById('vetsGrid');
+        const totalVetsEl = document.getElementById('totalVets');
+        const totalVetsSkeleton = document.getElementById('totalVetsSkeleton');
+        const totalConsultationsEl = document.getElementById('totalConsultations');
+        const totalConsultationsSkeleton = document.getElementById('totalConsultationsSkeleton');
+        const avgRatingEl = document.getElementById('avgRating');
+        const avgRatingSkeleton = document.getElementById('avgRatingSkeleton');
+        const totalSpecialtiesEl = document.getElementById('totalSpecialties');
+        const totalSpecialtiesSkeleton = document.getElementById('totalSpecialtiesSkeleton');
+        const filteredCountEl = document.getElementById('filteredCount');
+        
+        // Show loading skeletons
+        totalVetsEl.classList.add('hidden');
+        totalVetsSkeleton.classList.remove('hidden');
+        totalConsultationsEl.classList.add('hidden');
+        totalConsultationsSkeleton.classList.remove('hidden');
+        avgRatingEl.classList.add('hidden');
+        avgRatingSkeleton.classList.remove('hidden');
+        totalSpecialtiesEl.classList.add('hidden');
+        totalSpecialtiesSkeleton.classList.remove('hidden');
+        
+        vetsGrid.innerHTML = `
+            ${Array(6).fill().map(() => `
+                <div class="bg-white p-6 rounded-2xl border border-gray-100 card-shadow">
+                    <div class="flex flex-col items-center">
+                        <div class="w-24 h-24 bg-gray-200 rounded-2xl animate-pulse mb-4"></div>
+                        <div class="w-3/4 h-5 bg-gray-200 rounded animate-pulse mb-2"></div>
+                        <div class="w-1/2 h-4 bg-gray-200 rounded animate-pulse mb-3"></div>
+                        <div class="w-full h-3 bg-gray-200 rounded animate-pulse mb-2"></div>
+                        <div class="w-2/3 h-3 bg-gray-200 rounded animate-pulse mb-4"></div>
+                        <div class="w-full h-10 bg-gray-200 rounded-xl animate-pulse"></div>
+                    </div>
+                </div>
+            `).join('')}
+        `;
+        
+        try {
+            const response = await authenticatedFetch('/api/veterinarians/', {
+                method: 'GET'
+            });
+            
+            if (response.ok) {
+                allVets = await response.json();
+                
+                // Calculate stats
+                const totalConsultations = allVets.reduce((sum, vet) => sum + (vet.total_consultations || 0), 0);
+                const avgRatingCalc = allVets.length > 0 
+                    ? (allVets.reduce((sum, vet) => sum + (vet.avg_rating || 0), 0) / allVets.length)
+                    : 0;
+                const avgRating = isNaN(avgRatingCalc) ? '0.0' : avgRatingCalc.toFixed(1);
+                const uniqueSpecialties = new Set(allVets.map(vet => vet.specialization).filter(Boolean)).size;
+                
+                // Hide skeletons and show actual counts
+                totalVetsSkeleton.classList.add('hidden');
+                totalVetsEl.classList.remove('hidden');
+                totalVetsEl.innerText = allVets.length;
+                
+                totalConsultationsSkeleton.classList.add('hidden');
+                totalConsultationsEl.classList.remove('hidden');
+                totalConsultationsEl.innerText = totalConsultations.toLocaleString();
+                
+                avgRatingSkeleton.classList.add('hidden');
+                avgRatingEl.classList.remove('hidden');
+                avgRatingEl.innerText = avgRating;
+                
+                totalSpecialtiesSkeleton.classList.add('hidden');
+                totalSpecialtiesEl.classList.remove('hidden');
+                totalSpecialtiesEl.innerText = uniqueSpecialties;
+                
+                applyFilters();
+            } else {
+                vetsGrid.innerHTML = '<p class="text-center text-red-500 p-8 bg-white rounded-2xl border border-red-100 col-span-full">Failed to load veterinarians. Please try again later.</p>';
+                totalVetsSkeleton.classList.add('hidden');
+                totalVetsEl.classList.remove('hidden');
+                totalConsultationsSkeleton.classList.add('hidden');
+                totalConsultationsEl.classList.remove('hidden');
+                avgRatingSkeleton.classList.add('hidden');
+                avgRatingEl.classList.remove('hidden');
+                totalSpecialtiesSkeleton.classList.add('hidden');
+                totalSpecialtiesEl.classList.remove('hidden');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            vetsGrid.innerHTML = '<p class="text-center text-red-500 p-8 bg-white rounded-2xl border border-red-100 col-span-full">Connection error. Please try again later.</p>';
+            totalVetsSkeleton.classList.add('hidden');
+            totalVetsEl.classList.remove('hidden');
+            totalConsultationsSkeleton.classList.add('hidden');
+            totalConsultationsEl.classList.remove('hidden');
+            avgRatingSkeleton.classList.add('hidden');
+            avgRatingEl.classList.remove('hidden');
+            totalSpecialtiesSkeleton.classList.add('hidden');
+            totalSpecialtiesEl.classList.remove('hidden');
+        }
+    }
+
+    function applyFilters() {
+        const specialtyFilter = document.getElementById('specialtyFilter').value;
+        const ratingFilter = document.getElementById('ratingFilter').value;
+        const locationFilter = document.getElementById('locationFilter').value.toLowerCase();
+        const sortBy = document.getElementById('sortBy').value;
+        
+        let filteredVets = [...allVets];
+        
+        // Apply specialty filter
+        if (specialtyFilter) {
+            filteredVets = filteredVets.filter(vet => 
+                vet.specialization && vet.specialization.toLowerCase().includes(specialtyFilter.toLowerCase())
+            );
+        }
+        
+        // Apply rating filter
+        if (ratingFilter) {
+            const minRating = parseFloat(ratingFilter);
+            filteredVets = filteredVets.filter(vet => 
+                vet.avg_rating >= minRating
+            );
+        }
+        
+        // Apply location filter
+        if (locationFilter) {
+            filteredVets = filteredVets.filter(vet => 
+                vet.location && vet.location.toLowerCase().includes(locationFilter)
+            );
+        }
+        
+        // Apply sorting
+        switch(sortBy) {
+            case 'rating':
+                filteredVets.sort((a, b) => b.avg_rating - a.avg_rating);
+                break;
+            case 'experience':
+                filteredVets.sort((a, b) => b.years_experience - a.years_experience);
+                break;
+            case 'reviews':
+                filteredVets.sort((a, b) => b.total_consultations - a.total_consultations);
+                break;
+            default:
+                // Recommended - mix of rating and experience
+                filteredVets.sort((a, b) => (b.avg_rating * b.total_consultations) - (a.avg_rating * a.total_consultations));
+        }
+        
+        // Update count
+        document.getElementById('filteredCount').innerText = filteredVets.length;
+        
+        renderVets(filteredVets);
+    }
+
+    function renderVets(vets) {
+        const vetsGrid = document.getElementById('vetsGrid');
+        console.log('Rendering vets:', vets);
+        
+        if (vets.length === 0) {
+            vetsGrid.innerHTML = `
+                <div class="flex flex-col items-center justify-center p-12 bg-white rounded-2xl border border-gray-100 col-span-full text-center">
+                    <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center text-gray-300 mb-4">
+                        <i data-lucide="search" class="w-8 h-8"></i>
+                    </div>
+                    <h4 class="text-lg font-bold text-gray-900 font-hanken">No specialists found</h4>
+                    <p class="text-sm text-gray-500 mt-1">Try adjusting your filters to see more results.</p>
+                </div>
+            `;
+            return;
+        }
+        
+        try {
+            vetsGrid.innerHTML = vets.map(vet => {
+                console.log('Rendering vet:', vet);
+                const avatar = vet.profile_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(vet.user.full_name)}&background=003fb1&color=fff&size=400`;
+                const isVerified = vet.status === 'VERIFIED';
+                const capitalizeName = (name) => {
+                    if (!name) return '';
+                    return name.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
+                };
+                const escapeHtml = (text) => {
+                    if (!text) return '';
+                    return String(text).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+                };
+                
+                return `
+                    <div class="bg-white rounded-2xl border border-gray-100 card-shadow hover:translate-y-[-4px] transition-all duration-300 overflow-hidden group">
+                        <div class="relative h-48 overflow-hidden">
+                            <img src="${avatar}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" alt="${escapeHtml(vet.user.full_name)}">
+                            ${isVerified ? `
+                                <div class="absolute top-3 right-3 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-sm">
+                                    <i data-lucide="check" class="w-3 h-3"></i> VERIFIED
+                                </div>
+                            ` : ''}
+                            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
+                                <h4 class="text-lg font-bold text-white font-hanken">Dr. ${escapeHtml(capitalizeName(vet.user.full_name))}</h4>
+                            </div>
+                        </div>
+                        
+                        <div class="p-5">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center gap-1">
+                                    <i data-lucide="star" class="w-4 h-4 text-yellow-400 fill-current"></i>
+                                    <span class="text-sm font-bold text-gray-900">${vet.avg_rating}</span>
+                                </div>
+                                <div class="flex items-center gap-1 text-xs text-gray-500">
+                                    <i data-lucide="briefcase" class="w-3 h-3"></i>
+                                    <span>${vet.years_experience} Years</span>
+                                </div>
+                            </div>
+                            
+                            <p class="text-sm font-bold text-[var(--primary)] mb-3">${escapeHtml(vet.specialization || 'General Veterinarian')}</p>
+                            
+                            <div class="flex items-center gap-2 text-xs text-gray-500 mb-2">
+                                <i data-lucide="map-pin" class="w-3 h-3"></i>
+                                <span>${escapeHtml(vet.location || 'Location not specified')}</span>
+                            </div>
+                            
+                            <div class="flex items-center gap-2 text-xs text-gray-500 mb-4">
+                                <i data-lucide="banknote" class="w-3 h-3"></i>
+                                <span class="font-bold text-[var(--primary)]">PKR ${vet.consultation_fee || '0'}/session</span>
+                            </div>
+                            
+                            <button onclick="window.viewProfile('${vet.id}')" class="w-full bg-[var(--primary)] text-white py-3 rounded-xl font-bold text-sm hover:bg-blue-800 transition-all shadow-lg shadow-blue-100">
+                                View Profile
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('') + `
+                <div class="bg-gradient-to-br from-blue-50 to-purple-50 p-6 rounded-2xl border border-blue-100 flex flex-col items-center justify-center text-center">
+                    <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4 shadow-sm">
+                        <i data-lucide="sparkles" class="w-8 h-8 text-[var(--primary)]"></i>
+                    </div>
+                    <h4 class="text-lg font-bold text-gray-900 font-hanken mb-2">More Results Coming</h4>
+                    <p class="text-sm text-gray-600">Additional specialists being calibrated by Clinical Heart AI...</p>
+                </div>
+            `;
+        } catch (error) {
+            console.error('Error rendering vets:', error);
+            vetsGrid.innerHTML = `<p class="text-center text-red-500 p-8 bg-white rounded-2xl border border-red-100 col-span-full">Error rendering veterinarians: ${error.message}</p>`;
+            return;
+        }
+        
+        lucide.createIcons();
+    }
+
+    window.viewProfile = function(vetId) {
+        // Navigate to vet profile page
+        window.location.href = `/veterinarians/${vetId}/`;
+    }
+
+    document.addEventListener('DOMContentLoaded', loadVets);
+</script>
+{% endblock %}

@@ -1,0 +1,650 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Book Appointment - Dr.{{ veterinarian.user.full_name|capfirst }} - PetXpert{% endblock %}
+
+{% block page_title %}Book Appointment{% endblock %}
+{% block page_subtitle %}Schedule your consultation with Dr.{{ veterinarian.user.full_name|capfirst }}{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Back Button -->
+    <button onclick="history.back()" class="mb-6 flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors font-medium">
+        <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        Back to Profile
+    </button>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <!-- Left Sidebar - Veterinarian Summary (Sticky) -->
+        <div class="lg:col-span-4">
+            <div class="lg:sticky lg:top-8 space-y-6">
+                <!-- Veterinarian Summary Card -->
+                <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                    <div class="relative">
+                        <div class="h-24 bg-gradient-to-r from-blue-600 to-blue-700"></div>
+                        <div class="absolute -bottom-12 left-1/2 transform -translate-x-1/2">
+                            <div class="w-24 h-24 rounded-2xl overflow-hidden border-4 border-white shadow-lg bg-white">
+                                {% if veterinarian.profile_image %}
+                                    <img src="{{ veterinarian.profile_image.url }}" alt="{{ veterinarian.user.full_name }}" class="w-full h-full object-cover">
+                                {% else %}
+                                    <div class="w-full h-full bg-blue-50 flex items-center justify-center text-blue-600">
+                                        <i data-lucide="user" class="w-12 h-12"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pt-16 pb-6 px-6 text-center">
+                        <h2 class="text-xl font-bold text-gray-900 font-hanken mb-1">Dr.{{ veterinarian.user.full_name|capfirst }}</h2>
+                        <p class="text-[var(--primary)] font-semibold mb-3">{{ veterinarian.specialization|default:'General Veterinarian'|capfirst }}</p>
+                        
+                        <!-- Rating -->
+                        <div class="flex items-center justify-center gap-2 mb-4">
+                            <div class="flex items-center gap-1">
+                                {% for i in "12345" %}
+                                    <i data-lucide="star" class="w-4 h-4 {% if forloop.counter <= veterinarian.avg_rating|default:0 %}text-yellow-400 fill-current{% else %}text-gray-300{% endif %}"></i>
+                                {% endfor %}
+                            </div>
+                            <span class="text-sm font-bold text-gray-900">{{ veterinarian.avg_rating|default:0 }}</span>
+                            <span class="text-sm text-gray-500">({{ veterinarian.rating_count|default:0 }})</span>
+                        </div>
+                        
+                        <!-- Stats -->
+                        <div class="grid grid-cols-2 gap-3 mb-4">
+                            <div class="bg-gray-50 rounded-xl p-3">
+                                <div class="text-xs text-gray-500 mb-1">Experience</div>
+                                <div class="text-lg font-bold text-gray-900">{{ veterinarian.years_experience }} <sup>Years</sup></div>
+                            </div>
+                            <div class="bg-gray-50 rounded-xl p-3">
+                                <div class="text-xs text-gray-500 mb-1">Consultations</div>
+                                <div class="text-lg font-bold text-gray-900">{{ veterinarian.total_consultations }}</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Fee -->
+                        <div class="bg-blue-50 rounded-xl p-4">
+                            <div class="text-sm text-blue-600 mb-1">Consultation Fee</div>
+                            <div class="text-2xl font-bold text-blue-700">PKR {{ veterinarian.consultation_fee }}</div>
+                            <div class="text-xs text-blue-500">per session</div>
+                        </div>
+                        
+                        <!-- Verification Badge -->
+                        {% if veterinarian.status == 'VERIFIED' %}
+                            <div class="mt-4 inline-flex items-center gap-2 bg-green-50 text-green-700 px-4 py-2 rounded-full text-sm font-semibold">
+                                <i data-lucide="check-circle" class="w-4 h-4"></i>
+                                Verified Veterinarian
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content - Booking Form -->
+        <div class="lg:col-span-8">
+            <!-- Progress Stepper -->
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6">
+                <div class="flex items-center justify-between">
+                    <!-- Step 1 -->
+                    <div class="flex flex-col items-center flex-1" id="step1-indicator">
+                        <div class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold mb-2 transition-all" id="step1-circle">1</div>
+                        <span class="text-xs font-medium text-gray-900">Select Pet</span>
+                    </div>
+                    <!-- Connector -->
+                    <div class="flex-1 h-1 bg-gray-200 mx-2" id="connector1"></div>
+                    <!-- Step 2 -->
+                    <div class="flex flex-col items-center flex-1" id="step2-indicator">
+                        <div class="w-10 h-10 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center font-bold mb-2 transition-all" id="step2-circle">2</div>
+                        <span class="text-xs font-medium text-gray-500">Date & Time</span>
+                    </div>
+                    <!-- Connector -->
+                    <div class="flex-1 h-1 bg-gray-200 mx-2" id="connector2"></div>
+                    <!-- Step 3 -->
+                    <div class="flex flex-col items-center flex-1" id="step3-indicator">
+                        <div class="w-10 h-10 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center font-bold mb-2 transition-all" id="step3-circle">3</div>
+                        <span class="text-xs font-medium text-gray-500">Details</span>
+                    </div>
+                    <!-- Connector -->
+                    <div class="flex-1 h-1 bg-gray-200 mx-2" id="connector3"></div>
+                    <!-- Step 4 -->
+                    <div class="flex flex-col items-center flex-1" id="step4-indicator">
+                        <div class="w-10 h-10 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center font-bold mb-2 transition-all" id="step4-circle">4</div>
+                        <span class="text-xs font-medium text-gray-500">Confirm</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step Content -->
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                <!-- Step 1: Pet Selection -->
+                <div id="step1-content" class="step-content">
+                    <h3 class="text-xl font-bold text-gray-900 font-hanken mb-6 flex items-center gap-2">
+                        <i data-lucide="paw-print" class="w-6 h-6 text-[var(--primary)]"></i>
+                        Select Your Pet
+                    </h3>
+                    
+                    <div id="petsContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                        <div class="flex items-center justify-center p-12 text-gray-500">
+                            <i data-lucide="loader-2" class="w-8 h-8 animate-spin mr-3"></i>
+                            Loading your pets...
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-end mt-6">
+                        <button onclick="goToStep(2)" id="step1-next" class="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2" disabled>
+                            Next
+                            <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 2: Date & Time -->
+                <div id="step2-content" class="step-content hidden">
+                    <h3 class="text-xl font-bold text-gray-900 font-hanken mb-6 flex items-center gap-2">
+                        <i data-lucide="calendar" class="w-6 h-6 text-[var(--primary)]"></i>
+                        Select Date & Time
+                    </h3>
+                    
+                    <!-- Date Selection -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-3">Select Date</label>
+                        <div id="calendarContainer" class="bg-gray-50 rounded-xl p-4">
+                            <div class="flex items-center justify-center p-8 text-gray-500">
+                                <i data-lucide="loader-2" class="w-8 h-8 animate-spin mr-3"></i>
+                                Loading calendar...
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Time Slot Selection -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-3">Select Time Slot</label>
+                        <div id="timeSlotsContainer" class="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                            <div class="col-span-full text-center p-8 text-gray-500">
+                                Please select a date first
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-between mt-6">
+                        <button onclick="goToStep(1)" class="bg-gray-100 text-gray-700 px-8 py-3 rounded-xl font-bold hover:bg-gray-200 transition-all flex items-center gap-2">
+                            <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                            Back
+                        </button>
+                        <button onclick="goToStep(3)" id="step2-next" class="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2" disabled>
+                            Next
+                            <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 3: Appointment Details -->
+                <div id="step3-content" class="step-content hidden">
+                    <h3 class="text-xl font-bold text-gray-900 font-hanken mb-6 flex items-center gap-2">
+                        <i data-lucide="clipboard-list" class="w-6 h-6 text-[var(--primary)]"></i>
+                        Appointment Details
+                    </h3>
+                    
+                    <!-- Duration Selection -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-3">Select Duration</label>
+                        <div class="grid grid-cols-1 gap-3">
+                            <button onclick="selectDuration(60)" class="duration-btn p-4 border-2 border-gray-200 rounded-xl hover:border-blue-500 transition-all text-center" data-duration="60">
+                                <div class="text-2xl font-bold text-gray-900">1 Hour</div>
+                                <div class="text-sm text-gray-500">Standard consultation duration</div>
+                                <div class="text-xs text-blue-600 mt-1">PKR {{ veterinarian.consultation_fee|floatformat:0 }}</div>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Visit Reason -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-3">Reason for Visit</label>
+                        <textarea id="visitReason" rows="5" class="w-full border border-gray-200 rounded-xl p-4 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" placeholder="Describe your pet's symptoms or the reason for consultation..."></textarea>
+                    </div>
+                    
+                    <div class="flex justify-between mt-6">
+                        <button onclick="goToStep(2)" class="bg-gray-100 text-gray-700 px-8 py-3 rounded-xl font-bold hover:bg-gray-200 transition-all flex items-center gap-2">
+                            <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                            Back
+                        </button>
+                        <button onclick="goToStep(4)" id="step3-next" class="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2" disabled>
+                            Next
+                            <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 4: Review & Confirm -->
+                <div id="step4-content" class="step-content hidden">
+                    <h3 class="text-xl font-bold text-gray-900 font-hanken mb-6 flex items-center gap-2">
+                        <i data-lucide="check-circle" class="w-6 h-6 text-[var(--primary)]"></i>
+                        Review & Confirm
+                    </h3>
+                    
+                    <!-- Summary -->
+                    <div class="bg-gray-50 rounded-xl p-6 mb-6">
+                        <h4 class="font-bold text-gray-900 mb-4">Appointment Summary</h4>
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Veterinarian</span>
+                                <span class="font-medium text-gray-900">Dr.{{ veterinarian.user.full_name|capfirst }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Pet</span>
+                                <span class="font-medium text-gray-900" id="summaryPet">-</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Date</span>
+                                <span class="font-medium text-gray-900" id="summaryDate">-</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Time</span>
+                                <span class="font-medium text-gray-900" id="summaryTime">-</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Duration</span>
+                                <span class="font-medium text-gray-900" id="summaryDuration">-</span>
+                            </div>
+                            <div class="border-t border-gray-200 pt-3 flex justify-between">
+                                <span class="font-bold text-gray-900">Total Fee</span>
+                                <span class="font-bold text-blue-600" id="summaryFee">-</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Terms -->
+                    <div class="mb-6">
+                        <label class="flex items-start gap-3 cursor-pointer">
+                            <input type="checkbox" id="termsCheckbox" class="mt-1 w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                            <span class="text-sm text-gray-600">I confirm that the information provided is accurate and I agree to the terms and conditions of PetXpert.</span>
+                        </label>
+                    </div>
+                    
+                    <div class="flex justify-between mt-6">
+                        <button onclick="goToStep(3)" class="bg-gray-100 text-gray-700 px-8 py-3 rounded-xl font-bold hover:bg-gray-200 transition-all flex items-center gap-2">
+                            <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                            Back
+                        </button>
+                        <button onclick="confirmBooking()" id="confirmBtn" class="bg-green-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-green-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2" disabled>
+                            <i data-lucide="check" class="w-5 h-5"></i>
+                            Confirm Booking
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let veterinarianId = '{{ veterinarian.id }}';
+    let currentStep = 1;
+    let selectedPet = null;
+    let selectedDate = null;
+    let selectedTime = null;
+    let selectedDuration = null;
+    let consultationFee = parseFloat('{{ veterinarian.consultation_fee }}');
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+        loadPets();
+        initCalendar();
+        
+        // Terms checkbox
+        const termsCheckbox = document.getElementById('termsCheckbox');
+        if (termsCheckbox) {
+            termsCheckbox.addEventListener('change', function() {
+                document.getElementById('confirmBtn').disabled = !this.checked;
+            });
+        }
+    });
+    
+    // Fallback: try to load immediately if DOM is already loaded
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+        setTimeout(function() {
+            loadPets();
+            initCalendar();
+        }, 100);
+    }
+
+    // Load user's pets
+    async function loadPets() {
+        const container = document.getElementById('petsContainer');
+        
+        if (!container) {
+            return;
+        }
+        
+        try {
+            // Get token from localStorage
+            const token = localStorage.getItem('access_token');
+            
+            const headers = {
+                'Content-Type': 'application/json',
+            };
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+            
+            const response = await fetch('/api/pets/', {
+                method: 'GET',
+                headers: headers
+            });
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP error! status: ${response.status}, body: ${errorText}`);
+            }
+            
+            const data = await response.json();
+            
+            if (data && data.length > 0) {
+                container.innerHTML = data.map(pet => {
+                    // Calculate age from date_of_birth
+                    let age = 'Age not specified';
+                    if (pet.date_of_birth) {
+                        const birthDate = new Date(pet.date_of_birth);
+                        const today = new Date();
+                        const ageInYears = Math.floor((today - birthDate) / (365.25 * 24 * 60 * 60 * 1000));
+                        if (ageInYears < 1) {
+                            const ageInMonths = Math.floor((today - birthDate) / (30.44 * 24 * 60 * 60 * 1000));
+                            age = ageInMonths === 1 ? '1 month' : `${ageInMonths} months`;
+                        } else {
+                            age = ageInYears === 1 ? '1 year' : `${ageInYears} years`;
+                        }
+                    }
+                    
+                    return `
+                    <div class="pet-card p-4 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-blue-500 transition-all" onclick="selectPet('${pet.id}', this)">
+                        <div class="flex items-center gap-4">
+                            <div class="w-16 h-16 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
+                                ${pet.picture ? `<img src="${pet.picture.url || pet.picture}" alt="${pet.name}" class="w-full h-full object-cover">` : '<div class="w-full h-full flex items-center justify-center text-gray-400"><i data-lucide="paw-print" class="w-8 h-8"></i></div>'}
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-gray-900">${pet.name}</h4>
+                                <p class="text-sm text-gray-500">${pet.species || 'Unknown'} • ${pet.breed || 'Unknown'}</p>
+                                <p class="text-xs text-gray-400">${age}</p>
+                            </div>
+                        </div>
+                    </div>
+                `}).join('');
+                
+                // Auto-select if only one pet
+                if (data.length === 1) {
+                    const firstPet = data[0];
+                    const firstCard = container.querySelector('.pet-card');
+                    selectPet(firstPet.id, firstCard);
+                }
+                
+                lucide.createIcons();
+            } else {
+                container.innerHTML = `
+                    <div class="col-span-full text-center p-8 text-gray-500">
+                        <i data-lucide="paw-print" class="w-12 h-12 mx-auto mb-3 text-gray-300"></i>
+                        <p class="font-medium">No pets found</p>
+                        <p class="text-sm">Add a pet to get started</p>
+                    </div>
+                `;
+                lucide.createIcons();
+            }
+        } catch (error) {
+            container.innerHTML = `
+                <div class="col-span-full text-center p-8 text-red-500">
+                    <i data-lucide="alert-circle" class="w-12 h-12 mx-auto mb-3"></i>
+                    <p class="font-medium">Failed to load pets</p>
+                    <p class="text-sm text-gray-500 mt-2">${error.message}</p>
+                </div>
+            `;
+            lucide.createIcons();
+        }
+    }
+
+    // Select pet
+    function selectPet(petId, element) {
+        selectedPet = petId;
+        document.querySelectorAll('.pet-card').forEach(card => {
+            card.classList.remove('border-blue-500', 'bg-blue-50');
+            card.classList.add('border-gray-200');
+        });
+        element.classList.remove('border-gray-200');
+        element.classList.add('border-blue-500', 'bg-blue-50');
+        document.getElementById('step1-next').disabled = false;
+    }
+
+    // Initialize calendar
+    function initCalendar() {
+        const container = document.getElementById('calendarContainer');
+        const today = new Date();
+        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        
+        let html = `
+            <div class="flex items-center justify-between mb-4">
+                <button onclick="changeMonth(-1)" class="p-2 hover:bg-gray-200 rounded-lg transition-colors">
+                    <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                </button>
+                <h4 class="font-bold text-gray-900" id="currentMonth">${months[today.getMonth()]} ${today.getFullYear()}</h4>
+                <button onclick="changeMonth(1)" class="p-2 hover:bg-gray-200 rounded-lg transition-colors">
+                    <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="grid grid-cols-7 gap-1 mb-2">
+                ${days.map(day => `<div class="text-center text-xs font-medium text-gray-500 py-2">${day}</div>`).join('')}
+            </div>
+            <div class="grid grid-cols-7 gap-1" id="calendarDays">
+        `;
+        
+        // Generate days for current month
+        const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+        const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+        const startDay = firstDay.getDay();
+        
+        // Empty cells for days before first day of month
+        for (let i = 0; i < startDay; i++) {
+            html += '<div></div>';
+        }
+        
+        // Days of the month
+        for (let day = 1; day <= lastDay.getDate(); day++) {
+            const date = new Date(today.getFullYear(), today.getMonth(), day);
+            const isPast = date < today && date.toDateString() !== today.toDateString();
+            const isToday = date.toDateString() === today.toDateString();
+            
+            if (isPast) {
+                html += `<div class="text-center py-2 text-gray-300">${day}</div>`;
+            } else {
+                html += `
+                    <button onclick="selectDate('${date.toISOString().split('T')[0]}', this)" 
+                            class="calendar-day text-center py-2 rounded-lg hover:bg-blue-100 transition-colors ${isToday ? 'bg-blue-600 text-white hover:bg-blue-700' : ''}">
+                        ${day}
+                    </button>
+                `;
+            }
+        }
+        
+        html += '</div>';
+        container.innerHTML = html;
+        lucide.createIcons();
+    }
+
+    // Select date
+    function selectDate(dateStr, element) {
+        selectedDate = dateStr;
+        document.querySelectorAll('.calendar-day').forEach(day => {
+            day.classList.remove('bg-blue-600', 'text-white');
+        });
+        element.classList.add('bg-blue-600', 'text-white');
+        loadTimeSlots(dateStr);
+    }
+
+    // Load time slots
+    async function loadTimeSlots(dateStr) {
+        const container = document.getElementById('timeSlotsContainer');
+        container.innerHTML = '<div class="col-span-full text-center p-8 text-gray-500"><i data-lucide="loader-2" class="w-8 h-8 animate-spin mx-auto mb-3"></i>Loading time slots...</div>';
+        lucide.createIcons();
+        
+        try {
+            // Get token from localStorage
+            const token = localStorage.getItem('access_token');
+            
+            const headers = {
+                'Content-Type': 'application/json',
+            };
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+            
+            // Fetch available time slots from API
+            const response = await fetch(`/api/appointments/available-slots/?veterinarian_id=${veterinarianId}&date=${dateStr}`, {
+                method: 'GET',
+                headers: headers
+            });
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP error! status: ${response.status}, body: ${errorText}`);
+            }
+            
+            const slots = await response.json();
+            
+            container.innerHTML = slots.map(slot => `
+                <button onclick="selectTime('${slot.time}', '${slot.display}', this)"
+                        class="time-slot p-3 border-2 rounded-xl font-medium transition-all ${slot.available ? 'border-gray-200 hover:border-blue-500 text-gray-900' : 'border-gray-100 bg-gray-50 text-gray-400 cursor-not-allowed'}"
+                        ${!slot.available ? 'disabled' : ''}>
+                    ${slot.display}
+                </button>
+            `).join('');
+            
+        } catch (error) {
+            container.innerHTML = '<div class="col-span-full text-center p-8 text-red-500">Failed to load time slots</div>';
+        }
+    }
+
+    // Select time
+    function selectTime(timeStr, displayTime, element) {
+        selectedTime = { time: timeStr, display: displayTime };
+        document.querySelectorAll('.time-slot').forEach(slot => {
+            slot.classList.remove('border-blue-500', 'bg-blue-50');
+        });
+        element.classList.add('border-blue-500', 'bg-blue-50');
+        document.getElementById('step2-next').disabled = false;
+    }
+
+    // Select duration
+    function selectDuration(minutes) {
+        selectedDuration = minutes;
+        document.querySelectorAll('.duration-btn').forEach(btn => {
+            btn.classList.remove('border-blue-500', 'bg-blue-50');
+            btn.classList.add('border-gray-200');
+        });
+        const selectedBtn = document.querySelector(`.duration-btn[data-duration="${minutes}"]`);
+        selectedBtn.classList.remove('border-gray-200');
+        selectedBtn.classList.add('border-blue-500', 'bg-blue-50');
+        
+        // Enable next button if reason is filled
+        const reason = document.getElementById('visitReason').value;
+        document.getElementById('step3-next').disabled = !reason.trim();
+    }
+
+    // Visit reason input
+    document.getElementById('visitReason').addEventListener('input', function() {
+        document.getElementById('step3-next').disabled = !this.value.trim() || !selectedDuration;
+    });
+
+    // Navigate between steps
+    function goToStep(step) {
+        // Hide all steps
+        document.querySelectorAll('.step-content').forEach(content => {
+            content.classList.add('hidden');
+        });
+        
+        // Show target step
+        document.getElementById(`step${step}-content`).classList.remove('hidden');
+        
+        // Update stepper indicators
+        for (let i = 1; i <= 4; i++) {
+            const circle = document.getElementById(`step${i}-circle`);
+            const indicator = document.getElementById(`step${i}-indicator`);
+            const connector = document.getElementById(`connector${i}`);
+            
+            if (i < step) {
+                circle.classList.remove('bg-gray-200', 'text-gray-500');
+                circle.classList.add('bg-green-500', 'text-white');
+                circle.innerHTML = '<i data-lucide="check" class="w-5 h-5"></i>';
+                indicator.querySelector('span').classList.remove('text-gray-500');
+                indicator.querySelector('span').classList.add('text-gray-900');
+                if (connector) {
+                    connector.classList.remove('bg-gray-200');
+                    connector.classList.add('bg-green-500');
+                }
+            } else if (i === step) {
+                circle.classList.remove('bg-gray-200', 'text-gray-500', 'bg-green-500');
+                circle.classList.add('bg-blue-600', 'text-white');
+                circle.textContent = i;
+                indicator.querySelector('span').classList.remove('text-gray-500');
+                indicator.querySelector('span').classList.add('text-gray-900');
+            } else {
+                circle.classList.remove('bg-blue-600', 'text-white', 'bg-green-500');
+                circle.classList.add('bg-gray-200', 'text-gray-500');
+                circle.textContent = i;
+                indicator.querySelector('span').classList.remove('text-gray-900');
+                indicator.querySelector('span').classList.add('text-gray-500');
+            }
+        }
+        
+        lucide.createIcons();
+        
+        // Auto-select 60-minute duration when reaching step 3
+        if (step === 3 && !selectedDuration) {
+            selectDuration(60);
+        }
+        
+        // Update summary if going to step 4
+        if (step === 4) {
+            updateSummary();
+        }
+        
+        currentStep = step;
+    }
+
+    // Update summary
+    function updateSummary() {
+        // Get pet name
+        const petCard = document.querySelector('.pet-card.border-blue-500');
+        if (petCard) {
+            document.getElementById('summaryPet').textContent = petCard.querySelector('h4').textContent;
+        }
+        
+        document.getElementById('summaryDate').textContent = selectedDate ? new Date(selectedDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : '-';
+        document.getElementById('summaryTime').textContent = selectedTime ? selectedTime.display : '-';
+        document.getElementById('summaryDuration').textContent = selectedDuration ? '1 Hour' : '-';
+        
+        const totalFee = consultationFee;
+        document.getElementById('summaryFee').textContent = `PKR ${totalFee}`;
+    }
+
+    // Confirm booking
+    async function confirmBooking() {
+        const confirmBtn = document.getElementById('confirmBtn');
+        confirmBtn.disabled = true;
+        confirmBtn.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Processing...';
+        lucide.createIcons();
+        
+        try {
+            // Redirect to payment page with booking details
+            const scheduledAt = `${selectedDate}T${selectedTime.time}:00`;
+            const reason = document.getElementById('visitReason').value;
+            
+            const paymentUrl = `/payment/?veterinarian_id=${veterinarianId}&pet_id=${selectedPet}&scheduled_at=${encodeURIComponent(scheduledAt)}&duration_minutes=60&reason=${encodeURIComponent(reason)}`;
+            
+            window.location.href = paymentUrl;
+        } catch (error) {
+            alert('Failed to proceed to payment. Please try again.');
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = '<i data-lucide="check" class="w-5 h-5"></i> Confirm Booking';
+            lucide.createIcons();
+        }
+    }
+</script>
+{% endblock %}

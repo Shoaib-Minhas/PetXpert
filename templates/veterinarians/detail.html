@@ -1,0 +1,348 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Dr.{{ veterinarian.user.full_name|capfirst }} - PetXpert{% endblock %}
+
+{% block page_title %}Dr.{{ veterinarian.user.full_name|capfirst }}{% endblock %}
+{% block page_subtitle %}{{ veterinarian.specialization|default:'General Veterinarian'|capfirst }}{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Back Button -->
+    <button onclick="history.back()" class="mb-6 flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors font-medium">
+        <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        Back to Veterinarians
+    </button>
+
+    <!-- Two-Column Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <!-- Left Sidebar (30%) -->
+        <div class="lg:col-span-4 space-y-6">
+            <!-- Doctor Profile Card -->
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                <div class="relative">
+                    <div class="h-32 bg-gradient-to-r from-blue-600 to-blue-700"></div>
+                    <div class="absolute -bottom-16 left-1/2 transform -translate-x-1/2">
+                        <div class="w-32 h-32 rounded-2xl overflow-hidden border-4 border-white shadow-lg bg-white">
+                            {% if veterinarian.profile_image %}
+                                <img src="{{ veterinarian.profile_image.url }}" alt="{{ veterinarian.user.full_name }}" class="w-full h-full object-cover">
+                            {% else %}
+                                <div class="w-full h-full bg-blue-50 flex items-center justify-center text-blue-600">
+                                    <i data-lucide="user" class="w-16 h-16"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="pt-20 pb-6 px-6 text-center">
+                    <h1 class="text-2xl font-bold text-gray-900 font-hanken mb-1">Dr.{{ veterinarian.user.full_name|capfirst }}</h1>
+                    <p class="text-[var(--primary)] font-semibold mb-3">{{ veterinarian.specialization|default:'General Veterinarian'|capfirst }}</p>
+                    
+                    <!-- Rating Badge -->
+                    <div class="flex items-center justify-center gap-2 mb-4">
+                        <div class="flex items-center gap-1">
+                            {% for i in "12345" %}
+                                <i data-lucide="star" class="w-4 h-4 {% if forloop.counter <= veterinarian.avg_rating|default:0 %}text-yellow-400 fill-current{% else %}text-gray-300{% endif %}"></i>
+                            {% endfor %}
+                        </div>
+                        <span class="text-sm font-bold text-gray-900">{{ veterinarian.avg_rating|default:0 }}</span>
+                        <span class="text-sm text-gray-500">({{ veterinarian.rating_count|default:0 }} reviews)</span>
+                    </div>
+                    
+                    <!-- Verification Badge -->
+                    {% if veterinarian.status == 'VERIFIED' %}
+                        <div class="inline-flex items-center gap-2 bg-green-50 text-green-700 px-4 py-2 rounded-full text-sm font-semibold">
+                            <i data-lucide="check-circle" class="w-4 h-4"></i>
+                            Verified Veterinarian
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Biography Card -->
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                <h3 class="text-lg font-bold text-gray-900 font-hanken mb-4 flex items-center gap-2">
+                    <i data-lucide="user" class="w-5 h-5 text-[var(--primary)]"></i>
+                    About
+                </h3>
+                {% if veterinarian.bio %}
+                    <p class="text-gray-600 leading-relaxed">{{ veterinarian.bio }}</p>
+                {% else %}
+                    <p class="text-gray-500 italic">No biography available.</p>
+                {% endif %}
+            </div>
+
+            <!-- Achievement/Statistics Card -->
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                <h3 class="text-lg font-bold text-gray-900 font-hanken mb-4 flex items-center gap-2">
+                    <i data-lucide="award" class="w-5 h-5 text-[var(--primary)]"></i>
+                    Statistics
+                </h3>
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600">
+                                <i data-lucide="briefcase" class="w-5 h-5"></i>
+                            </div>
+                            <span class="text-sm font-medium text-gray-700">Experience</span>
+                        </div>
+                        <span class="text-lg font-bold text-gray-900">{{ veterinarian.years_experience }} <sup>Years</sup></span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center text-green-600">
+                                <i data-lucide="message-square" class="w-5 h-5"></i>
+                            </div>
+                            <span class="text-sm font-medium text-gray-700">Consultations</span>
+                        </div>
+                        <span class="text-lg font-bold text-gray-900">{{ veterinarian.total_consultations }}</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center text-yellow-600">
+                                <i data-lucide="star" class="w-5 h-5"></i>
+                            </div>
+                            <span class="text-sm font-medium text-gray-700">Rating</span>
+                        </div>
+                        <span class="text-lg font-bold text-gray-900">{{ veterinarian.avg_rating|default:0 }}/5</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                <h3 class="text-lg font-bold text-gray-900 font-hanken mb-4 flex items-center gap-2">
+                    <i data-lucide="phone" class="w-5 h-5 text-[var(--primary)]"></i>
+                    Contact
+                </h3>
+                <div class="space-y-3">
+                    {% if veterinarian.clinic_name %}
+                        <div class="flex items-start gap-3">
+                            <i data-lucide="building" class="w-5 h-5 text-gray-400 mt-0.5"></i>
+                            <div>
+                                <p class="text-sm text-gray-500">Clinic</p>
+                                <p class="font-medium text-gray-900">{{ veterinarian.clinic_name }}</p>
+                            </div>
+                        </div>
+                    {% endif %}
+                    {% if veterinarian.clinic_address %}
+                        <div class="flex items-start gap-3">
+                            <i data-lucide="map-pin" class="w-5 h-5 text-gray-400 mt-0.5"></i>
+                            <div>
+                                <p class="text-sm text-gray-500">Address</p>
+                                <p class="font-medium text-gray-900">{{ veterinarian.clinic_address }}</p>
+                            </div>
+                        </div>
+                    {% endif %}
+                    {% if veterinarian.phone_number %}
+                        <div class="flex items-start gap-3">
+                            <i data-lucide="phone" class="w-5 h-5 text-gray-400 mt-0.5"></i>
+                            <div>
+                                <p class="text-sm text-gray-500">Phone</p>
+                                <p class="font-medium text-gray-900">{{ veterinarian.phone_number }}</p>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Area (70%) -->
+        <div class="lg:col-span-8 space-y-6">
+            <!-- Consultation Fee Card -->
+            <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-6 text-white">
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-6">
+                    <div class="text-center sm:text-left">
+                        <p class="text-blue-100 text-sm mb-1">Consultation Fee</p>
+                        <p class="text-3xl font-bold font-hanken">PKR {{ veterinarian.consultation_fee }}</p>
+                        <p class="text-blue-200 text-sm">per session with Dr.{{ veterinarian.user.full_name|capfirst }}</p>
+                    </div>
+                    <div class="flex flex-col gap-3 w-full sm:w-auto">
+                        <a href="/veterinarians/{{ veterinarian.id }}/book/" class="bg-white text-blue-600 px-6 py-3 rounded-xl font-bold hover:bg-blue-50 transition-all shadow-lg flex items-center justify-center gap-2">
+                            <i data-lucide="calendar-check" class="w-5 h-5"></i>
+                            Book Appointment
+                        </a>
+                        <button class="bg-blue-500 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-400 transition-all border border-blue-400 flex items-center justify-center gap-2">
+                            <i data-lucide="messages-square" class="w-5 h-5"></i>
+                            Chat with Doctor
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Education & Credentials -->
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                <h3 class="text-lg font-bold text-gray-900 font-hanken mb-6 flex items-center gap-2">
+                    <i data-lucide="graduation-cap" class="w-5 h-5 text-[var(--primary)]"></i>
+                    Education & Credentials
+                </h3>
+                <div class="space-y-4">
+                    {% if veterinarian.qualification %}
+                        <div class="flex items-start gap-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+                            <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center text-purple-600 flex-shrink-0">
+                                <i data-lucide="award" class="w-6 h-6"></i>
+                            </div>
+                            <div class="flex-grow">
+                                <h4 class="font-bold text-gray-900 mb-1">{{ veterinarian.qualification }}</h4>
+                                <p class="text-sm text-gray-600">Professional Degree</p>
+                            </div>
+                        </div>
+                    {% endif %}
+                    {% if veterinarian.license_number %}
+                        <div class="flex items-start gap-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+                            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600 flex-shrink-0">
+                                <i data-lucide="badge-check" class="w-6 h-6"></i>
+                            </div>
+                            <div class="flex-grow">
+                                <h4 class="font-bold text-gray-900 mb-1">{{ veterinarian.license_number }}</h4>
+                                <p class="text-sm text-gray-600">License Number</p>
+                            </div>
+                        </div>
+                    {% endif %}
+                    <div class="flex items-start gap-4 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+                        <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center text-green-600 flex-shrink-0">
+                            <i data-lucide="check-circle" class="w-6 h-6"></i>
+                        </div>
+                        <div class="flex-grow">
+                            <h4 class="font-bold text-gray-900 mb-1">
+                                {% if veterinarian.status == 'VERIFIED' %}
+                                    Verified Professional
+                                {% elif veterinarian.status == 'PENDING' %}
+                                    Pending Verification
+                                {% elif veterinarian.status == 'REJECTED' %}
+                                    Rejected
+                                {% else %}
+                                    {{ veterinarian.status }}
+                                {% endif %}
+                            </h4>
+                            <p class="text-sm text-gray-600">Verification Status</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Specialization Tags -->
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                <h3 class="text-lg font-bold text-gray-900 font-hanken mb-4 flex items-center gap-2">
+                    <i data-lucide="tag" class="w-5 h-5 text-[var(--primary)]"></i>
+                    Specializations
+                </h3>
+                <div class="flex flex-wrap gap-2">
+                    <span class="px-4 py-2 bg-blue-50 text-blue-700 rounded-full text-sm font-medium">{{ veterinarian.specialization|default:'General Veterinarian'|capfirst }}</span>
+                    <span class="px-4 py-2 bg-gray-100 text-gray-700 rounded-full text-sm font-medium">Pet Care</span>
+                    <span class="px-4 py-2 bg-gray-100 text-gray-700 rounded-full text-sm font-medium">Animal Health</span>
+                </div>
+            </div>
+
+            <!-- Reviews Section -->
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-lg font-bold text-gray-900 font-hanken flex items-center gap-2">
+                        <i data-lucide="star" class="w-5 h-5 text-[var(--primary)]"></i>
+                        Patient Reviews
+                    </h3>
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm text-gray-500">Sort by:</span>
+                        <select id="reviewSort" class="text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="recent">Most Recent</option>
+                            <option value="highest">Highest Rated</option>
+                            <option value="lowest">Lowest Rated</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div id="reviewsContainer">
+                    <div class="flex items-center justify-center p-12 text-gray-500">
+                        <i data-lucide="loader-2" class="w-8 h-8 animate-spin mr-3"></i>
+                        Loading reviews...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let veterinarianId = '{{ veterinarian.id }}';
+    
+    // Load reviews
+    async function loadReviews() {
+        const container = document.getElementById('reviewsContainer');
+        
+        try {
+            const response = await authenticatedFetch(`/api/veterinarians/${veterinarianId}/reviews/`, {
+                method: 'GET'
+            });
+            
+            if (response.ok) {
+                const reviews = await response.json();
+                renderReviews(reviews);
+            } else {
+                container.innerHTML = `
+                    <div class="text-center text-gray-500 p-8">
+                        <i data-lucide="alert-circle" class="w-8 h-8 mx-auto mb-3 text-gray-300"></i>
+                        <p>Failed to load reviews</p>
+                    </div>
+                `;
+            }
+        } catch (error) {
+            console.error('Error loading reviews:', error);
+            container.innerHTML = `
+                <div class="text-center text-gray-500 p-8">
+                    <i data-lucide="wifi-off" class="w-8 h-8 mx-auto mb-3 text-gray-300"></i>
+                    <p>Connection error</p>
+                </div>
+            `;
+        }
+    }
+    
+    function renderReviews(reviews) {
+        const container = document.getElementById('reviewsContainer');
+        
+        if (reviews.length === 0) {
+            container.innerHTML = `
+                <div class="text-center text-gray-500 p-8">
+                    <i data-lucide="message-square" class="w-8 h-8 mx-auto mb-3 text-gray-300"></i>
+                    <p>No reviews yet</p>
+                </div>
+            `;
+            return;
+        }
+        
+        container.innerHTML = reviews.map(review => {
+            const date = new Date(review.created_at).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            
+            return `
+                <div class="border-b border-gray-100 pb-6 mb-6 last:border-0 last:pb-0 last:mb-0">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center text-[var(--primary)] font-bold">
+                                ${review.user ? review.user.full_name.charAt(0).toUpperCase() : 'U'}
+                            </div>
+                            <div>
+                                <div class="font-bold text-gray-900">${review.user ? review.user.full_name : 'Anonymous'}</div>
+                                <div class="text-sm text-gray-500">${date}</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            ${Array(5).fill(0).map((_, i) => `
+                                <i data-lucide="star" class="w-4 h-4 ${i < review.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}"></i>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <p class="text-gray-600">${review.comment || 'No comment provided'}</p>
+                </div>
+            `;
+        }).join('');
+        
+        lucide.createIcons();
+    }
+    
+    // Load reviews on page load
+    document.addEventListener('DOMContentLoaded', loadReviews);
+</script>
+{% endblock %}

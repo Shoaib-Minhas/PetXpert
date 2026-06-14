@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PetXpert - AI-Powered Pet Healthcare</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&family=Inter:wght@400;500&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/scrollreveal"></script>
+    <style>
+        :root {
+            --primary: #003fb1;
+            --secondary: #006a61;
+            --background: #faf8ff;
+            --surface: #ffffff;
+            --on-surface: #191b23;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background);
+            color: var(--on-surface);
+        }
+        h1, h2, h3, h4 {
+            font-family: 'Hanken Grotesk', sans-serif;
+        }
+        .animate-counter {
+            transition: all 2s ease-out;
+        }
+    </style>
+</head>
+<body class="overflow-x-hidden">
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <span class="text-2xl font-bold text-[#003fb1]">PetXpert</span>
+                </div>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#" class="text-gray-600 hover:text-[#003fb1] font-medium">AI Diagnosis</a>
+                    <a href="#" class="text-gray-600 hover:text-[#003fb1] font-medium">Veterinary</a>
+                    <a href="#" class="text-gray-600 hover:text-[#003fb1] font-medium">My Pet</a>
+                    <a href="/signin/" class="text-gray-600 hover:text-[#003fb1] font-medium">Sign In</a>
+                    <a href="/signup/" class="bg-[#003fb1] text-white px-6 py-2 rounded-lg font-semibold hover:bg-[#003ab1] transition-colors">Register</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="pt-32 pb-20 px-4">
+        <div class="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-12">
+            <div class="flex-1 reveal-left">
+                <div class="inline-flex items-center px-3 py-1 rounded-full bg-teal-50 text-teal-700 text-sm font-medium mb-6 border border-teal-100">
+                    <i data-lucide="sparkles" class="w-4 h-4 mr-2"></i>
+                    NEW: Clinical-Grade Heart AI
+                </div>
+                <h1 class="text-5xl lg:text-6xl font-bold text-[#003fb1] leading-tight mb-6">
+                    AI-Powered Peace <br>of Mind for Your Pet
+                </h1>
+                <p class="text-lg text-gray-600 mb-8 max-w-xl">
+                    Transforming pet care with clinical precision. Instant diagnostic support, verified vet consultations, and a lifelong health record—all in one heart-centered platform.
+                </p>
+                <div class="flex flex-wrap gap-4">
+                    <button class="bg-[#003fb1] text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-[#003ab1] transition-all shadow-lg shadow-blue-200">
+                        Start Free AI Checkup
+                    </button>
+                    <button class="border-2 border-[#003fb1] text-[#003fb1] px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-50 transition-all">
+                        How it Works
+                    </button>
+                </div>
+                <div class="mt-10 flex items-center gap-4">
+                    <div class="flex -space-x-2">
+                        <img src="https://i.pravatar.cc/100?u=1" class="w-10 h-10 rounded-full border-2 border-white" alt="">
+                        <img src="https://i.pravatar.cc/100?u=2" class="w-10 h-10 rounded-full border-2 border-white" alt="">
+                        <img src="https://i.pravatar.cc/100?u=3" class="w-10 h-10 rounded-full border-2 border-white" alt="">
+                    </div>
+                    <p class="text-sm text-gray-500 font-medium"><span class="text-gray-900">50,000+</span> pet parents trust us</p>
+                </div>
+            </div>
+            <div class="flex-1 relative reveal-right">
+                <div class="relative z-10 rounded-[2rem] overflow-hidden shadow-2xl">
+                    <img src="https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&q=80&w=800" alt="Pet and Owner" class="w-full h-auto">
+                    <div class="absolute bottom-6 left-6 right-6 bg-white/90 backdrop-blur-md p-4 rounded-2xl shadow-xl flex items-center gap-4 border border-white/20">
+                        <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center text-green-600">
+                            <i data-lucide="check-circle-2" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <p class="font-bold text-gray-900">AI Health Check Complete</p>
+                            <p class="text-sm text-gray-500">Bella is 100% healthy. Heart rate: Normal.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="absolute -top-10 -right-10 w-64 h-64 bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
+                <div class="absolute -bottom-10 -left-10 w-64 h-64 bg-teal-100 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Partners -->
+    <section class="py-12 bg-white border-y border-gray-50">
+        <div class="max-w-7xl mx-auto px-4">
+            <p class="text-center text-sm font-bold text-gray-400 uppercase tracking-widest mb-8">Trusted by leading partner clinics</p>
+            <div class="flex flex-wrap justify-center items-center gap-12 md:gap-20 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
+                <span class="text-xl font-black text-gray-600">VETCARE+</span>
+                <span class="text-xl font-black text-gray-600">ANIMALIA</span>
+                <span class="text-xl font-black text-gray-600">PETPULSE</span>
+                <span class="text-xl font-black text-gray-600">CLINICORP</span>
+                <span class="text-xl font-black text-gray-600">HEARTVET</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="py-24 px-4 bg-[#faf8ff]">
+        <div class="max-w-7xl mx-auto text-center mb-16 reveal-up">
+            <h2 class="text-4xl font-bold text-[#003fb1] mb-4">Advanced Clinical Diagnostics</h2>
+            <p class="text-gray-600 max-w-2xl mx-auto">Built by world-class veterinarians and AI researchers to give your pet the precision care they deserve.</p>
+        </div>
+        <div class="max-w-7xl mx-auto grid md:grid-cols-3 gap-8">
+            <!-- Feature 1 -->
+            <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition-all reveal-up">
+                <div class="w-12 h-12 bg-blue-50 text-[#003fb1] rounded-xl flex items-center justify-center mb-6">
+                    <i data-lucide="stethoscope" class="w-6 h-6"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-4">Instant AI Diagnosis</h3>
+                <p class="text-gray-500 mb-6">Analyze photos, symptoms, and behavior in seconds. Our Fusion Layer AI combines visual data with clinical history for 98% accuracy.</p>
+                <div class="bg-gray-50 p-4 rounded-xl">
+                    <div class="flex justify-between text-xs font-bold mb-2">
+                        <span class="text-gray-400">Confidence Score</span>
+                        <span class="text-green-600">94%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-1.5">
+                        <div class="bg-green-500 h-1.5 rounded-full" style="width: 94%"></div>
+                    </div>
+                </div>
+            </div>
+            <!-- Feature 2 -->
+            <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition-all reveal-up" style="transition-delay: 100ms;">
+                <div class="w-12 h-12 bg-teal-50 text-teal-600 rounded-xl flex items-center justify-center mb-6">
+                    <i data-lucide="shield-check" class="w-6 h-6"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-4">Verified Vet Network</h3>
+                <p class="text-gray-500 mb-6">Connect with board-certified veterinarians instantly. Our platform bridges the gap between AI screening and expert clinical care.</p>
+                <div class="flex items-center gap-2">
+                    <div class="flex -space-x-2">
+                        <div class="w-8 h-8 rounded-full bg-gray-200 border-2 border-white"></div>
+                        <div class="w-8 h-8 rounded-full bg-gray-300 border-2 border-white"></div>
+                        <div class="w-8 h-8 rounded-full bg-gray-400 border-2 border-white"></div>
+                    </div>
+                    <span class="text-xs font-bold text-gray-400">24/7 Support</span>
+                </div>
+            </div>
+            <!-- Feature 3 -->
+            <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition-all reveal-up" style="transition-delay: 200ms;">
+                <div class="w-12 h-12 bg-orange-50 text-orange-600 rounded-xl flex items-center justify-center mb-6">
+                    <i data-lucide="clipboard-list" class="w-6 h-6"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-4">Complete Health History</h3>
+                <p class="text-gray-500 mb-6">A centralized clinical record that evolves with your pet. Accessible to any vet, anywhere, ensuring consistent care quality.</p>
+                <ul class="space-y-2">
+                    <li class="flex items-center text-xs font-bold text-gray-400">
+                        <i data-lucide="check" class="w-3 h-3 mr-2 text-green-500"></i> Vaccine Records
+                    </li>
+                    <li class="flex items-center text-xs font-bold text-gray-400">
+                        <i data-lucide="check" class="w-3 h-3 mr-2 text-green-500"></i> Lab Results
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats -->
+    <section class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 grid md:grid-cols-3 gap-12 text-center">
+            <div class="reveal-up">
+                <div class="text-5xl font-bold text-[#003fb1] mb-2"><span class="counter" data-target="49765">0</span>+</div>
+                <p class="text-gray-500 font-medium">Pet Lives Impacted</p>
+            </div>
+            <div class="reveal-up" style="transition-delay: 100ms;">
+                <div class="text-5xl font-bold text-[#003fb1] mb-2"><span class="counter" data-target="97">0</span>%</div>
+                <p class="text-gray-500 font-medium">Diagnostic Accuracy</p>
+            </div>
+            <div class="reveal-up" style="transition-delay: 200ms;">
+                <div class="text-5xl font-bold text-[#003fb1] mb-2"><span class="counter" data-target="1194">0</span>+</div>
+                <p class="text-gray-500 font-medium">Verified Veterinarians</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonial -->
+    <section class="py-24 px-4 bg-[#faf8ff]">
+        <div class="max-w-4xl mx-auto bg-white p-12 rounded-[3rem] shadow-xl relative reveal-up">
+            <div class="absolute -top-6 -left-6 text-blue-100">
+                <i data-lucide="quote" class="w-24 h-24"></i>
+            </div>
+            <div class="relative z-10">
+                <div class="flex gap-1 text-warm-accent mb-6 text-orange-400">
+                    <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                    <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                    <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                    <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                    <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                </div>
+                <p class="text-2xl font-medium text-gray-800 leading-relaxed mb-8">
+                    "PetXpert's AI caught a skin condition early, saving us an emergency visit. The consultation with Dr. Wilson was seamless and gave us incredible peace of mind."
+                </p>
+                <div class="flex items-center gap-4">
+                    <img src="https://i.pravatar.cc/100?u=4" class="w-14 h-14 rounded-full" alt="">
+                    <div>
+                        <p class="font-bold text-gray-900">Sarah & Luna</p>
+                        <p class="text-sm text-gray-500">Satisfied Pet Parent</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mobile App Promo -->
+    <section class="py-24 px-4">
+        <div class="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16">
+            <div class="flex-1 reveal-left">
+                <h2 class="text-4xl font-bold text-[#003fb1] mb-6">Your Pet's Health, <br>In Every Pocket</h2>
+                <p class="text-lg text-gray-600 mb-8">
+                    Whether you're at home on your desktop or at the park with your phone, PetXpert provides seamless access to clinical data and AI insights.
+                </p>
+                <ul class="space-y-4 mb-10">
+                    <li class="flex items-center gap-3">
+                        <div class="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold">1</div>
+                        <span class="font-medium text-gray-700">Cloud-synced medical records</span>
+                    </li>
+                    <li class="flex items-center gap-3">
+                        <div class="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold">2</div>
+                        <span class="font-medium text-gray-700">Real-time collaboration with vets</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="flex-1 flex justify-center reveal-right">
+                <div class="relative">
+                    <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=400" alt="Mobile App" class="w-64 rounded-[3rem] shadow-2xl border-8 border-gray-900">
+                    <div class="absolute -right-20 top-20 bg-white p-4 rounded-2xl shadow-xl border border-gray-100 hidden md:block">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">
+                                <i data-lucide="bell" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold">Vaccine Reminder</p>
+                                <p class="text-[10px] text-gray-400">Due in 2 days</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-50 pt-20 pb-10 px-4 border-t border-gray-100">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-start gap-12 mb-16">
+                <div class="max-w-xs">
+                    <span class="text-2xl font-bold text-[#003fb1] mb-4 block">PetXpert</span>
+                    <p class="text-sm text-gray-500">© 2026 PetXpert AI Healthcare. Clinical precision, empathetic care.</p>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+                    <div>
+                        <h4 class="font-bold text-gray-900 mb-4">Platform</h4>
+                        <ul class="space-y-2 text-sm text-gray-500">
+                            <li><a href="#" class="hover:text-[#003fb1]">AI Diagnosis</a></li>
+                            <li><a href="#" class="hover:text-[#003fb1]">Find a Vet</a></li>
+                            <li><a href="#" class="hover:text-[#003fb1]">Telehealth</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-gray-900 mb-4">Company</h4>
+                        <ul class="space-y-2 text-sm text-gray-500">
+                            <li><a href="#" class="hover:text-[#003fb1]">About Us</a></li>
+                            <li><a href="#" class="hover:text-[#003fb1]">Careers</a></li>
+                            <li><a href="#" class="hover:text-[#003fb1]">Contact</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-gray-900 mb-4">Legal</h4>
+                        <ul class="space-y-2 text-sm text-gray-500">
+                            <li><a href="#" class="hover:text-[#003fb1]">Privacy Policy</a></li>
+                            <li><a href="#" class="hover:text-[#003fb1]">Terms of Service</a></li>
+                            <li><a href="#" class="hover:text-[#003fb1]">AI Ethics</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-gray-900 mb-4">Emergency</h4>
+                        <ul class="space-y-2 text-sm text-red-600 font-bold">
+                            <li><a href="#" class="hover:underline">Emergency Care</a></li>
+                            <li><a href="#" class="hover:underline">24/7 Hotline</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // ScrollReveal Animations
+        ScrollReveal().reveal('.reveal-up', {
+            distance: '50px',
+            origin: 'bottom',
+            duration: 1000,
+            delay: 200,
+            easing: 'cubic-bezier(0.5, 0, 0, 1)',
+            interval: 100
+        });
+
+        ScrollReveal().reveal('.reveal-left', {
+            distance: '50px',
+            origin: 'left',
+            duration: 1000,
+            delay: 200,
+            easing: 'cubic-bezier(0.5, 0, 0, 1)'
+        });
+
+        ScrollReveal().reveal('.reveal-right', {
+            distance: '50px',
+            origin: 'right',
+            duration: 1000,
+            delay: 200,
+            easing: 'cubic-bezier(0.5, 0, 0, 1)'
+        });
+
+        // Animated Counter
+        const counters = document.querySelectorAll('.counter');
+        const speed = 200;
+
+        const animateCounters = () => {
+            counters.forEach(counter => {
+                const target = +counter.getAttribute('data-target');
+                const count = +counter.innerText;
+                const increment = target / speed;
+
+                if (count < target) {
+                    counter.innerText = Math.ceil(count + increment);
+                    setTimeout(animateCounters, 1);
+                } else {
+                    counter.innerText = target.toLocaleString();
+                }
+            });
+        };
+
+        // Trigger counter when visible
+        const observerOptions = {
+            threshold: 0.5
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animateCounters();
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        counters.forEach(counter => observer.observe(counter));
+    </script>
+</body>
+</html>

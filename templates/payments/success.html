@@ -1,0 +1,47 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Payment Successful - PetXpert{% endblock %}
+
+{% block page_title %}Payment Successful{% endblock %}
+{% block page_subtitle %}Your appointment has been confirmed{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 text-center">
+        <!-- Success Icon -->
+        <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i data-lucide="check" class="w-10 h-10 text-green-600"></i>
+        </div>
+
+        <h2 class="text-2xl font-bold text-gray-900 font-hanken mb-4">Payment Successful!</h2>
+        <p class="text-gray-600 mb-8">Your appointment has been confirmed successfully. You will receive a confirmation email shortly.</p>
+
+        <!-- Appointment Details -->
+        <div class="bg-gray-50 rounded-xl p-6 mb-8 text-left">
+            <h3 class="font-bold text-gray-900 mb-4">Appointment Details</h3>
+            <div class="space-y-3 text-sm">
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Session ID</span>
+                    <span class="font-medium text-gray-900">{{ session_id }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="/appointments/" class="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-700 transition-all flex items-center justify-center gap-2">
+                <i data-lucide="calendar" class="w-5 h-5"></i>
+                View My Appointments
+            </a>
+            <a href="/" class="border-2 border-gray-200 text-gray-900 px-8 py-3 rounded-xl font-bold hover:border-blue-500 transition-all flex items-center justify-center gap-2">
+                <i data-lucide="home" class="w-5 h-5"></i>
+                Back to Home
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    lucide.createIcons();
+</script>
+{% endblock %}

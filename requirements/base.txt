@@ -1,0 +1,19 @@
+# Core Django Dependencies
+Django>=5.2.0,<5.3.0
+djangorestframework>=3.15.0,<3.16.0
+djangorestframework-simplejwt>=5.3.0,<5.4.0
+
+# Payment Processing
+stripe>=15.0.0,<16.0.0
+
+# Database
+psycopg2-binary>=2.9.0,<3.0.0
+
+# Environment Variables
+python-decouple>=3.8.0,<4.0.0
+
+# Image Processing
+Pillow>=10.0.0,<11.0.0
+
+# CORS Support (for API)
+django-cors-headers>=4.3.0,<5.0.0

@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}PetXpert{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&family=Inter:wght@400;500&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/scrollreveal"></script>
+    <style>
+        :root {
+            --surface: #faf8ff;
+            --surface-dim: #d9d9e4;
+            --surface-bright: #faf8ff;
+            --surface-container-lowest: #ffffff;
+            --surface-container-low: #f3f3fe;
+            --surface-container: #ededf8;
+            --surface-container-high: #e7e7f3;
+            --surface-container-highest: #e2e1ed;
+            --on-surface: #191b23;
+            --on-surface-variant: #434654;
+            --inverse-surface: #2e3039;
+            --inverse-on-surface: #f0f0fb;
+            --outline: #737686;
+            --outline-variant: #c3c5d7;
+            --surface-tint: #1353d8;
+            --primary: #003fb1;
+            --on-primary: #ffffff;
+            --primary-container: #1a56db;
+            --on-primary-container: #d4dcff;
+            --inverse-primary: #b5c4ff;
+            --secondary: #006a61;
+            --on-secondary: #ffffff;
+            --secondary-container: #86f2e4;
+            --on-secondary-container: #006f66;
+            --tertiary: #852b00;
+            --on-tertiary: #ffffff;
+            --tertiary-container: #ad3b00;
+            --on-tertiary-container: #ffd4c5;
+            --error: #ba1a1a;
+            --on-error: #ffffff;
+            --error-container: #ffdad6;
+            --on-error-container: #93000a;
+            --primary-fixed: #dbe1ff;
+            --primary-fixed-dim: #b5c4ff;
+            --on-primary-fixed: #00174d;
+            --on-primary-fixed-variant: #003dab;
+            --secondary-fixed: #89f5e7;
+            --secondary-fixed-dim: #6bd8cb;
+            --on-secondary-fixed: #00201d;
+            --on-secondary-fixed-variant: #005049;
+            --tertiary-fixed: #ffdbcf;
+            --tertiary-fixed-dim: #ffb59a;
+            --on-tertiary-fixed: #380d00;
+            --on-tertiary-fixed-variant: #802a00;
+            --background: #faf8ff;
+            --on-background: #191b23;
+            --surface-variant: #e2e1ed;
+            --warm-accent: #F59E0B;
+            --emergency-red: #E11D48;
+            --moderate-orange: #EA580C;
+            --low-risk-green: #16A34A;
+            --neutral-surface: #F8FAFC;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background);
+            color: var(--on-background);
+            margin: 0;
+            padding: 0;
+        }
+        h1, h2, h3, h4, .font-hanken {
+            font-family: 'Hanken Grotesk', sans-serif;
+        }
+        .sidebar-item-active {
+            background-color: var(--surface-container-low);
+            color: var(--primary);
+            border-right: 4px solid var(--primary);
+        }
+        .card-shadow {
+            box-shadow: 0 4px 16px rgba(0, 63, 177, 0.08);
+        }
+        .severity-pill {
+            border-radius: 9999px;
+            padding: 2px 8px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="flex">
+    <!-- Sidebar -->
+    <aside class="w-[240px] bg-white border-r border-gray-100 flex flex-col fixed h-full z-50">
+        <div class="p-6 flex items-center gap-3">
+            <div class="w-10 h-10 bg-[var(--primary)] rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-100">
+                <i data-lucide="paw-print" class="w-6 h-6"></i>
+            </div>
+            <span class="text-2xl font-bold text-[var(--primary)] font-hanken">PetXpert</span>
+        </div>
+
+        <nav class="flex-1 px-4 py-6 space-y-1">
+            <a href="/" class="flex items-center gap-3 px-4 py-3 text-gray-500 hover:bg-[var(--surface-container-low)] rounded-xl transition-all group">
+                <i data-lucide="layout-dashboard" class="w-5 h-5 group-hover:text-[var(--primary)]"></i>
+                <span class="font-semibold text-sm">Dashboard</span>
+            </a>
+            <a href="/veterinarians/" id="nav-vets" class="flex items-center gap-3 px-4 py-3 text-gray-500 hover:bg-[var(--surface-container-low)] rounded-xl transition-all group">
+                <i data-lucide="stethoscope" class="w-5 h-5 group-hover:text-[var(--primary)]"></i>
+                <span class="font-semibold text-sm">Vet Services</span>
+            </a>
+            <a href="/my-pets/" id="nav-pets" class="flex items-center gap-3 px-4 py-3 text-gray-500 hover:bg-[var(--surface-container-low)] rounded-xl transition-all group">
+                <i data-lucide="paw-print" class="w-5 h-5 group-hover:text-[var(--primary)]"></i>
+                <span class="font-semibold text-sm">My Pets</span>
+            </a>
+            <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-500 hover:bg-[var(--surface-container-low)] rounded-xl transition-all group">
+                <i data-lucide="calendar" class="w-5 h-5 group-hover:text-[var(--primary)]"></i>
+                <span class="font-semibold text-sm">Appointments</span>
+            </a>
+            <a href="#" class="flex items-center gap-3 px-4 py-3 text-gray-500 hover:bg-[var(--surface-container-low)] rounded-xl transition-all group">
+                <i data-lucide="clipboard-list" class="w-5 h-5 group-hover:text-[var(--primary)]"></i>
+                <span class="font-semibold text-sm">Health Records</span>
+            </a>
+            <a href="#" onclick="openEditProfileModal()" class="flex items-center gap-3 px-4 py-3 text-gray-500 hover:bg-[var(--surface-container-low)] rounded-xl transition-all group">
+                <i data-lucide="user" class="w-5 h-5 group-hover:text-[var(--primary)]"></i>
+                <span class="font-semibold text-sm">Edit Profile</span>
+            </a>
+            
+        </nav>
+
+                    
+            <button onclick="logout()" class="w-full flex items-center gap-3 px-4 py-3 mt-4 text-gray-500 hover:text-red-600 transition-colors group">
+                <i data-lucide="log-out" class="w-5 h-5 group-hover:text-red-600"></i>
+                <span class="font-semibold text-sm">Logout</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 ml-[240px] min-h-screen">
+        <!-- Top Header -->
+        <header class="h-20 bg-white/80 backdrop-blur-md border-b border-gray-100 px-8 flex justify-between items-center sticky top-0 z-40">
+            <div>
+                <h2 class="text-xl font-bold text-gray-900 font-hanken">{% block page_title %}{% endblock %}</h2>
+                <p class="text-xs text-gray-500 font-medium">{% block page_subtitle %}{% endblock %}</p>
+            </div>
+            
+            <div class="flex items-center gap-6">
+                
+                
+                <div class="flex items-center gap-4">
+                    <button class="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors relative">
+                        <i data-lucide="bell" class="w-5 h-5"></i>
+                        <span class="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+                    </button>
+                    
+                    <div class="h-10 w-px bg-gray-100"></div>
+                    
+                    <div class="flex items-center gap-3">
+                        <div class="text-right">
+                            <p id="userName" class="text-sm font-bold text-gray-900">User</p>
+                            <p id="userRole" class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Role</p>
+                        </div>
+                        <div id="profileAvatar" class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center text-[var(--primary)] overflow-hidden shadow-sm">
+                            <i data-lucide="user" class="w-6 h-6"></i>
+                        </div>
+                        <div id="profileAvatarSkeleton" class="w-10 h-10 bg-gray-200 rounded-xl animate-pulse hidden"></div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="p-8">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- Edit Profile Modal -->
+    <div id="editProfileModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto m-4">
+            <div class="p-6 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white rounded-t-2xl">
+                <h2 class="text-xl font-bold text-gray-900 font-hanken">Edit Profile</h2>
+                <button onclick="closeEditProfileModal()" class="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            
+            <form id="editProfileForm" class="p-6 space-y-6">
+                <!-- Profile Image Section -->
+                <div class="flex items-center gap-6">
+                    <div id="modalProfileAvatar" class="w-24 h-24 bg-blue-100 rounded-2xl flex items-center justify-center text-[var(--primary)] overflow-hidden shadow-sm">
+                        <i data-lucide="user" class="w-12 h-12"></i>
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Profile Image</label>
+                        <input type="file" id="profileImageInput" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
+                        <div class="flex gap-2">
+                            <button type="button" onclick="document.getElementById('profileImageInput').click()" class="px-4 py-2 bg-[var(--primary)] text-white rounded-lg text-sm font-bold hover:bg-blue-800 transition-colors">
+                                Upload Image
+                            </button>
+                            <button type="button" onclick="removeProfileImage()" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-bold hover:bg-gray-200 transition-colors">
+                                Remove
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Basic Information -->
+                <div class="space-y-4">
+                    <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Basic Information</h3>
+                    
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Full Name</label>
+                        <input type="text" id="fullName" name="full_name" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent" placeholder="Enter your full name">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Email</label>
+                        <input type="email" id="email" name="email" class="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent" disabled>
+                    </div>
+                </div>
+
+                <!-- Veterinarian Specific Fields -->
+                <div id="veterinarianFields" class="space-y-4 hidden">
+                    <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Veterinarian Information</h3>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">License Number</label>
+                            <input type="text" id="licenseNumber" name="license_number" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent" placeholder="Enter license number">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Years of Experience</label>
+                            <input type="number" id="yearsExperience" name="years_experience" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent" placeholder="Years of experience">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Specialization</label>
+                        <input type="text" id="specialization" name="specialization" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent" placeholder="e.g., Small Animals, Surgery">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Qualification</label>
+                        <input type="text" id="qualification" name="qualification" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent" placeholder="e.g., DVM, PhD">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Clinic Name</label>
+                        <input type="text" id="clinicName" name="clinic_name" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent" placeholder="Enter clinic name">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Clinic Address</label>
+                        <textarea id="clinicAddress" name="clinic_address" rows="2" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent" placeholder="Enter clinic address"></textarea>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Phone Number</label>
+                        <input type="text" id="phoneNumber" name="phone_number" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent" placeholder="Enter phone number">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Consultation Fee</label>
+                        <input type="number" step="0.01" id="consultationFee" name="consultation_fee" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent" placeholder="Enter consultation fee">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Bio</label>
+                        <textarea id="bio" name="bio" rows="3" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-transparent" placeholder="Write a short bio about yourself"></textarea>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex gap-3 pt-4 border-t border-gray-100">
+                    <button type="button" onclick="closeEditProfileModal()" class="flex-1 px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition-colors">
+                        Cancel
+                    </button>
+                    <button type="submit" class="flex-1 px-6 py-3 bg-[var(--primary)] text-white rounded-xl font-bold hover:bg-blue-800 transition-colors">
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+        
+        const token = localStorage.getItem('access_token');
+        const userData = localStorage.getItem('user');
+
+        if (!token || !userData) {
+            window.location.href = '/signin/';
+        } else {
+            const user = JSON.parse(userData);
+            const capitalizeName = (name) => {
+                if (!name) return '';
+                return name.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
+            };
+            document.getElementById('userName').innerText = capitalizeName(user.full_name || user.email);
+            document.getElementById('userRole').innerText = user.role.replace('_', ' ');
+            loadProfileImage();
+        }
+
+        // Token refresh function
+        async function refreshAccessToken() {
+            const refreshToken = localStorage.getItem('refresh_token');
+            if (!refreshToken) {
+                logout();
+                return null;
+            }
+
+            try {
+                const response = await fetch('/api/token/refresh/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ refresh: refreshToken })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    localStorage.setItem('access_token', data.access);
+                    return data.access;
+                } else {
+                    logout();
+                    return null;
+                }
+            } catch (error) {
+                console.error('Token refresh failed:', error);
+                logout();
+                return null;
+            }
+        }
+
+        // Enhanced fetch with token refresh
+        async function authenticatedFetch(url, options = {}) {
+            let token = localStorage.getItem('access_token');
+            
+            // Don't set Content-Type for FormData - let browser set it with boundary
+            const headers = {
+                ...options.headers,
+                'Authorization': `Bearer ${token}`
+            };
+            
+            // Remove Content-Type if body is FormData
+            if (options.body instanceof FormData) {
+                delete headers['Content-Type'];
+            }
+            
+            const response = await fetch(url, {
+                ...options,
+                headers: headers
+            });
+
+            if (response.status === 401) {
+                const newToken = await refreshAccessToken();
+                if (newToken) {
+                    const retryHeaders = {
+                        ...options.headers,
+                        'Authorization': `Bearer ${newToken}`
+                    };
+                    
+                    // Remove Content-Type for FormData on retry
+                    if (options.body instanceof FormData) {
+                        delete retryHeaders['Content-Type'];
+                    }
+                    
+                    return fetch(url, {
+                        ...options,
+                        headers: retryHeaders
+                    });
+                }
+            }
+
+            return response;
+        }
+
+        function loadProfileImage() {
+            // Show skeleton loader
+            document.getElementById('profileAvatar').classList.add('hidden');
+            document.getElementById('profileAvatarSkeleton').classList.remove('hidden');
+            
+            authenticatedFetch('/api/profile/', {
+                method: 'GET'
+            })
+            .then(response => response.json())
+            .then(data => {
+                let imageUrl = null;
+                
+                // Use profile_image for veterinarians, avatar for pet owners
+                if (data.role === 'VETERINARIAN' && data.profile_image) {
+                    imageUrl = data.profile_image;
+                } else if (data.avatar) {
+                    imageUrl = data.avatar;
+                }
+                
+                // Hide skeleton loader
+                document.getElementById('profileAvatarSkeleton').classList.add('hidden');
+                document.getElementById('profileAvatar').classList.remove('hidden');
+                
+                if (imageUrl) {
+                    const avatarImg = `<img src="${imageUrl}" alt="Profile" class="w-full h-full object-cover">`;
+                    document.getElementById('profileAvatar').innerHTML = avatarImg;
+                } else {
+                    document.getElementById('profileAvatar').innerHTML = '<i data-lucide="user" class="w-6 h-6"></i>';
+                    lucide.createIcons();
+                }
+            })
+            .catch(error => {
+                console.error('Error loading profile:', error);
+                // Hide skeleton loader on error
+                document.getElementById('profileAvatarSkeleton').classList.add('hidden');
+                document.getElementById('profileAvatar').classList.remove('hidden');
+            });
+        }
+
+        function logout() {
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            localStorage.removeItem('user');
+            window.location.href = '/signin/';
+        }
+
+        // Edit Profile Modal Functions
+        function openEditProfileModal() {
+            const modal = document.getElementById('editProfileModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            loadProfileData();
+        }
+
+        function closeEditProfileModal() {
+            const modal = document.getElementById('editProfileModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function loadProfileData() {
+            authenticatedFetch('/api/profile/', {
+                method: 'GET'
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Populate basic fields
+                document.getElementById('fullName').value = data.full_name || '';
+                document.getElementById('email').value = data.email || '';
+                
+                // Update modal avatar
+                let imageUrl = null;
+                if (data.role === 'VETERINARIAN' && data.profile_image) {
+                    imageUrl = data.profile_image;
+                } else if (data.avatar) {
+                    imageUrl = data.avatar;
+                }
+                
+                if (imageUrl) {
+                    const avatarImg = `<img src="${imageUrl}" alt="Profile" class="w-full h-full object-cover">`;
+                    document.getElementById('modalProfileAvatar').innerHTML = avatarImg;
+                }
+                
+                // Show veterinarian fields if user is a veterinarian
+                if (data.role === 'VETERINARIAN') {
+                    document.getElementById('veterinarianFields').classList.remove('hidden');
+                    loadVeterinarianProfileData();
+                }
+            })
+            .catch(error => console.error('Error loading profile:', error));
+        }
+
+        function loadVeterinarianProfileData() {
+            authenticatedFetch('/api/profile/vet/update/', {
+                method: 'GET'
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('licenseNumber').value = data.license_number || '';
+                document.getElementById('yearsExperience').value = data.years_experience || '';
+                document.getElementById('specialization').value = data.specialization || '';
+                document.getElementById('qualification').value = data.qualification || '';
+                document.getElementById('clinicName').value = data.clinic_name || '';
+                document.getElementById('clinicAddress').value = data.clinic_address || '';
+                document.getElementById('phoneNumber').value = data.phone_number || '';
+                document.getElementById('consultationFee').value = data.consultation_fee || '';
+                document.getElementById('bio').value = data.bio || '';
+            })
+            .catch(error => console.error('Error loading veterinarian profile:', error));
+        }
+
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const avatarImg = `<img src="${e.target.result}" alt="Profile" class="w-full h-full object-cover">`;
+                    document.getElementById('modalProfileAvatar').innerHTML = avatarImg;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function removeProfileImage() {
+            const avatarImg = `<i data-lucide="user" class="w-12 h-12"></i>`;
+            document.getElementById('modalProfileAvatar').innerHTML = avatarImg;
+            document.getElementById('profileImageInput').value = '';
+            lucide.createIcons();
+        }
+
+        // Handle form submission
+        document.getElementById('editProfileForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const userData = JSON.parse(localStorage.getItem('user'));
+            
+            // Update basic user profile first
+            const basicUserData = {
+                full_name: document.getElementById('fullName').value
+            };
+            
+            authenticatedFetch('/api/profile/', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(basicUserData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Update user data in localStorage
+                const updatedUser = {
+                    ...userData,
+                    full_name: document.getElementById('fullName').value
+                };
+                localStorage.setItem('user', JSON.stringify(updatedUser));
+                
+                // Update display name with capitalization
+                const capitalizeName = (name) => {
+                    if (!name) return '';
+                    return name.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
+                };
+                document.getElementById('userName').innerText = capitalizeName(updatedUser.full_name || updatedUser.email);
+                
+                // Handle profile image upload if selected
+                const imageInput = document.getElementById('profileImageInput');
+                if (imageInput.files[0]) {
+                    uploadProfileImage(userData.role);
+                } else {
+                    // If veterinarian, update veterinarian profile
+                    if (userData.role === 'VETERINARIAN') {
+                        updateVeterinarianProfile();
+                    } else {
+                        // Reload profile image and close modal
+                        loadProfileImage();
+                        closeEditProfileModal();
+                        alert('Profile updated successfully!');
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error updating profile:', error);
+                alert('Error updating profile. Please try again.');
+            });
+        });
+
+        function uploadProfileImage(userRole) {
+            const token = localStorage.getItem('access_token');
+            const imageInput = document.getElementById('profileImageInput');
+            const formData = new FormData();
+            
+            if (userRole === 'VETERINARIAN') {
+                formData.append('profile_image', imageInput.files[0]);
+            } else {
+                formData.append('avatar', imageInput.files[0]);
+            }
+            
+            const endpoint = userRole === 'VETERINARIAN' 
+                ? '/api/profile/vet/avatar/upload/' 
+                : '/api/profile/avatar/upload/';
+            
+            authenticatedFetch(endpoint, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                const userData = JSON.parse(localStorage.getItem('user'));
+                if (userData.role === 'VETERINARIAN') {
+                    updateVeterinarianProfile();
+                } else {
+                    loadProfileImage();
+                    closeEditProfileModal();
+                    alert('Profile updated successfully!');
+                }
+            })
+            .catch(error => {
+                console.error('Error uploading profile image:', error);
+                alert('Error uploading profile image. Please try again.');
+            });
+        }
+
+        function updateVeterinarianProfile() {
+            const vetData = {
+                license_number: document.getElementById('licenseNumber').value,
+                years_experience: document.getElementById('yearsExperience').value,
+                specialization: document.getElementById('specialization').value,
+                qualification: document.getElementById('qualification').value,
+                clinic_name: document.getElementById('clinicName').value,
+                clinic_address: document.getElementById('clinicAddress').value,
+                phone_number: document.getElementById('phoneNumber').value,
+                consultation_fee: document.getElementById('consultationFee').value,
+                bio: document.getElementById('bio').value
+            };
+            
+            authenticatedFetch('/api/profile/vet/update/', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(vetData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                loadProfileImage();
+                closeEditProfileModal();
+                alert('Profile updated successfully!');
+            })
+            .catch(error => {
+                console.error('Error updating veterinarian profile:', error);
+                alert('Error updating veterinarian profile. Please try again.');
+            });
+        }
+
+        const currentPath = window.location.pathname;
+        if (currentPath === '/veterinarians/') {
+            const navVets = document.getElementById('nav-vets');
+            if (navVets) {
+                navVets.classList.add('sidebar-item-active');
+                navVets.classList.remove('text-gray-500');
+            }
+        }
+        if (currentPath === '/my-pets/') {
+            const navPets = document.getElementById('nav-pets');
+            if (navPets) {
+                navPets.classList.add('sidebar-item-active');
+                navPets.classList.remove('text-gray-500');
+            }
+        }
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
