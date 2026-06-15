@@ -11,8 +11,8 @@
 ### 1. Clone the Repository
 
 ```bash
-git clone <repository-url>
-cd PetXpert_Final_Updated
+git clone https://github.com/Shoaib-Minhas/PetXpert.git
+cd PetXpert
 ```
 
 ### 2. Create Virtual Environment
@@ -30,11 +30,8 @@ source venv/bin/activate
 ### 3. Install Dependencies
 
 ```bash
-# For development (includes debugging tools)
+# Install all dependencies (recommended)
 pip install -r requirements/development.txt
-
-# For production
-pip install -r requirements/production.txt
 
 # Quick installation (base only)
 pip install -r requirements.txt
@@ -61,7 +58,13 @@ STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret
 
 # Email Configuration (optional)
 EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
+
+# Groq API (required for AI Diagnosis)
+GROQ_API_KEY=gsk_your_groq_api_key_here
+GROQ_MODEL=llama-3.3-70b-versatile
 ```
+
+> **Important**: Get your Groq API key at [https://console.groq.com/keys](https://console.groq.com/keys). The AI Diagnosis feature will not work without it.
 
 ### 5. Database Setup
 
@@ -84,38 +87,102 @@ The application will be available at `http://127.0.0.1:8000`
 ## Project Structure
 
 ```
-PetXpert_Final_Updated/
+PetXpert/
 ├── apps/                    # Django applications
 │   ├── accounts/           # User authentication
 │   ├── appointments/       # Appointment booking
-│   ├── payments/          # Stripe payment integration
-│   ├── pets/              # Pet management
-│   ├── veterinarians/     # Veterinarian profiles
+│   ├── chat/               # AI Diagnosis chat system
+│   ├── diagnosis/          # Diagnosis records
+│   ├── payments/           # Stripe payment integration
+│   ├── pets/               # Pet management
+│   └── veterinarians/      # Veterinarian profiles
+├── config/                 # Django configuration
+│   ├── settings/           # Environment-specific settings
+│   ├── urls.py             # URL routing
+│   └── wsgi.py             # WSGI configuration
+├── services/               # AI Diagnosis service layer
+│   ├── chat_service.py     # Chat orchestration
+│   ├── llm_service.py      # Groq API integration (Llama 3.3 70B)
+│   ├── image_service.py    # Image classification (ViT)
+│   ├── rag_service.py      # Retrieval-Augmented Generation
+│   ├── disease_mapping.py  # Veterinary knowledge base
+│   └── ml/                 # Machine learning models
+│       └── image_model.py  # Vision Transformer model
+├── templates/              # HTML templates
+│   ├── layouts/            # Base layout with sidebar
+│   ├── diagnosis/          # AI Diagnosis page
 │   └── ...
-├── config/                # Django configuration
-│   ├── settings/         # Environment-specific settings
-│   ├── urls.py           # URL routing
-│   └── wsgi.py           # WSGI configuration
-├── templates/             # HTML templates
-├── static/               # Static files (CSS, JS)
-├── media/                # User uploaded files
-├── requirements/         # Python dependencies
-│   ├── base.txt          # Core dependencies
-│   ├── development.txt   # Development tools
-│   └── production.txt    # Production dependencies
-├── manage.py             # Django management script
-└── requirements.txt      # Quick installation file
+├── static/                 # Static files (CSS, JS)
+│   ├── css/
+│   │   └── ai-diagnosis.css
+│   └── js/
+│       └── ai-diagnosis.js
+├── uploads/                # Uploaded pet images (AI Diagnosis)
+├── media/                  # User uploaded files (avatars, pets)
+├── requirements/           # Python dependencies
+│   ├── ai.txt              # AI/ML dependencies
+│   ├── base.txt            # Core dependencies
+│   ├── development.txt     # Development tools
+│   └── production.txt      # Production dependencies
+├── manage.py               # Django management script
+├── requirements.txt        # Quick installation file
+└── .gitignore              # Git ignore rules
 ```
 
 ## Key Features
 
+- **AI Diagnosis**: AI-powered pet health assessment with symptom analysis, image upload, and real-time SSE streaming responses via Groq API (Llama 3.3 70B + Llama 4 Scout vision)
 - **User Authentication**: JWT-based authentication system
 - **Veterinarian Profiles**: Search and book appointments with veterinarians
-- **Pet Management**: Add and manage pet profiles
+- **Pet Management**: Add and manage pet profiles with medical history
 - **Appointment Booking**: Real-time scheduling with 1-hour slots
 - **Stripe Payment Integration**: Secure hosted checkout
 - **Review System**: Rate and review veterinarians
-- **Responsive Design**: Mobile-friendly interface
+- **Responsive Design**: Mobile-friendly interface with Tailwind CSS
+- **Secure by Default**: `.env` excluded from git, push protection enabled
+
+## AI Diagnosis Feature
+
+The AI Diagnosis page (`/ai-diagnosis/`) provides an AI-powered veterinary assistant that:
+
+- Accepts text descriptions of pet symptoms
+- Supports image upload for visual analysis
+- Streams AI responses in real-time via Server-Sent Events (SSE)
+- Uses Groq's Llama 3.3 70B for text and Llama 4 Scout for vision
+- Includes a veterinary knowledge base covering 5 disease categories
+- Generates structured diagnoses with treatment plans and vet urgency guidance
+- Supports RAG (Retrieval-Augmented Generation) for context-aware responses
+
+### Enabling AI Diagnosis
+
+1. Get a Groq API key from [https://console.groq.com/keys](https://console.groq.com/keys)
+2. Add it to your `.env` file as `GROQ_API_KEY`
+3. Install the `groq` package:
+   ```bash
+   pip install groq
+   ```
+4. Restart the development server
+
+### Optional: Image Classification Model
+
+For pet disease image classification, a fine-tuned ViT (Vision Transformer) model can be used:
+
+```bash
+pip install torch torchvision transformers Pillow
+```
+
+Place the model checkpoint at `data/model_checkpoints/vit-pet-disease.pth`.
+The feature degrades gracefully if the model is not available.
+
+### Optional: RAG with ONNX Embeddings
+
+For higher-quality semantic search in the RAG system:
+
+```bash
+pip install optimum[onnxruntime] transformers
+```
+
+Falls back to TF-IDF embeddings if ONNX is not available.
 
 ## API Endpoints
 
@@ -123,6 +190,8 @@ PetXpert_Final_Updated/
 - `POST /api/signup/` - User registration
 - `POST /api/signin/` - User login
 - `POST /api/token/refresh/` - Refresh JWT token
+- `GET /api/profile/` - Get user profile
+- `PUT /api/profile/` - Update user profile
 
 ### Appointments
 - `GET /api/appointments/available-slots/` - Get available time slots
@@ -131,6 +200,16 @@ PetXpert_Final_Updated/
 ### Payments
 - `POST /api/payments/create-checkout-session/` - Create Stripe checkout
 - `POST /api/webhooks/stripe/` - Stripe webhook handler
+
+### AI Diagnosis (Chat)
+- `POST /api/v1/chat/sessions` - Create a new chat session
+- `GET /api/v1/chat/sessions/<id>` - Get session details
+- `DELETE /api/v1/chat/sessions/<id>` - Delete a session
+- `GET /api/v1/chat/sessions/<id>/messages` - Get session messages
+- `POST /api/v1/chat/sessions/<id>/messages/send` - Send message (non-streaming)
+- `POST /api/v1/chat/sessions/<id>/messages/stream` - Send message (SSE streaming)
+- `GET /api/v1/chat/sessions/<id>/diagnosis` - Get latest diagnosis
+- `GET /api/v1/health` - Health check
 
 ## Stripe Configuration
 
@@ -149,6 +228,16 @@ PetXpert_Final_Updated/
 - `checkout.session.completed` - Payment successful, create appointment
 
 ## Troubleshooting
+
+### ModuleNotFoundError: No module named 'groq'
+```bash
+pip install groq
+```
+
+### AI Diagnosis not responding
+- Ensure `GROQ_API_KEY` is set in `.env`
+- Verify the API key at [https://console.groq.com/keys](https://console.groq.com/keys)
+- Check your Groq account has available credits
 
 ### ModuleNotFoundError: No module named 'stripe'
 ```bash
@@ -186,6 +275,17 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 Set `DEBUG=False` and configure production database in `.env` file.
 
+Required for production:
+```
+DEBUG=False
+SECRET_KEY=<strong-random-key>
+DATABASE_URL=postgresql://...
+GROQ_API_KEY=gsk_...
+STRIPE_SECRET_KEY=sk_live_...
+STRIPE_PUBLISHABLE_KEY=pk_live_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+```
+
 ## Support
 
-For issues and questions, please refer to the project documentation or contact the development team.
+For issues and questions, please refer to the project documentation or open an issue on GitHub.
