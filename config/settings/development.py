@@ -1,8 +1,9 @@
 from pathlib import Path
+from decouple import config
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-SECRET_KEY = 'django-insecure-development-key-for-petxpert'
+SECRET_KEY = config('SECRET_KEY', default='django-insecure-development-key-for-petxpert')
 
 DEBUG = True
 
@@ -22,6 +23,7 @@ INSTALLED_APPS = [
     'apps.accounts',
     'apps.pets',
     'apps.diagnosis',
+    'apps.chat',
     'apps.veterinarians',
     'apps.appointments',
     'apps.consultations',
@@ -107,4 +109,28 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Stripe Configuration
+STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY', default='sk_test_placeholder')
+STRIPE_PUBLISHABLE_KEY = config('STRIPE_PUBLISHABLE_KEY', default='pk_test_placeholder')
+STRIPE_WEBHOOK_SECRET = config('STRIPE_WEBHOOK_SECRET', default='whsec_placeholder')
+
+# ── AI Diagnosis / Chat Settings ──────────────────────────────────────────
+
+# Groq API
+GROQ_API_KEY = config('GROQ_API_KEY', default='')
+GROQ_MODEL = config('GROQ_MODEL', default='llama-3.3-70b-versatile')
+
+# Image Model (ViT)
+IMAGE_MODEL_NAME = config('IMAGE_MODEL_NAME', default='google/vit-base-patch16-224-in21k')
+IMAGE_MODEL_PATH = config('IMAGE_MODEL_PATH', default=str(BASE_DIR / 'data' / 'model_checkpoints' / 'vit-pet-disease.pth'))
+DEVICE = config('DEVICE', default='cpu')
+
+# LLM Settings
+LLM_TEMPERATURE = float(config('LLM_TEMPERATURE', default='0.4'))
+LLM_MAX_TOKENS = int(config('LLM_MAX_TOKENS', default='1024'))
+
+# File Upload
+MAX_IMAGE_SIZE_MB = int(config('MAX_IMAGE_SIZE_MB', default='10'))
+UPLOAD_DIR = BASE_DIR / 'uploads'
 

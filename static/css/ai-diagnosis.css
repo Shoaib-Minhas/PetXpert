@@ -1,0 +1,453 @@
+/* ==========================================================================
+   AI Diagnosis — Chat UI Styles
+   PetXpert Design System · Premium Healthcare SaaS
+   ========================================================================== */
+
+/* ────────────────────────────────────────────────────────────────────────
+   SCROLL BEHAVIOR
+   - Hidden by default (welcome screen — no scrollbar)
+   - Enabled via .chat-scroll-active when messages overflow
+   ──────────────────────────────────────────────────────────────────────── */
+
+#messages-area {
+    overflow-y: hidden;
+}
+
+#messages-area.chat-scroll-active {
+    overflow-y: auto;
+}
+
+/* Thin custom scrollbar for chat area */
+#messages-area.chat-scroll-active::-webkit-scrollbar {
+    width: 5px;
+}
+
+#messages-area.chat-scroll-active::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#messages-area.chat-scroll-active::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 9999px;
+}
+
+#messages-area.chat-scroll-active::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+}
+
+/* Firefox */
+#messages-area.chat-scroll-active {
+    scrollbar-width: thin;
+    scrollbar-color: #d1d5db transparent;
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   HERO ICON — Shield + Paw Print
+   ──────────────────────────────────────────────────────────────────────── */
+
+.hero-icon-wrapper {
+    position: relative;
+}
+
+.hero-icon-outer {
+    position: relative;
+    display: inline-block;
+}
+
+.hero-icon-glow {
+    position: absolute;
+    inset: -16px;
+    background: radial-gradient(circle, rgba(0, 63, 177, 0.12) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: hero-glow-pulse 3s ease-in-out infinite;
+}
+
+@keyframes hero-glow-pulse {
+    0%, 100% { opacity: 0.6; transform: scale(1); }
+    50%      { opacity: 1;   transform: scale(1.08); }
+}
+
+.hero-icon-inner {
+    position: relative;
+    width: 88px;
+    height: 88px;
+    border-radius: 28px;
+    background: linear-gradient(135deg, rgba(0, 63, 177, 0.06) 0%, rgba(26, 86, 219, 0.04) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow:
+        0 16px 40px -12px rgba(0, 63, 177, 0.18),
+        0 4px 12px rgba(0, 63, 177, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(0, 63, 177, 0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hero-icon-inner:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        0 20px 48px -12px rgba(0, 63, 177, 0.24),
+        0 6px 16px rgba(0, 63, 177, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.hero-icon-svg {
+    width: 56px;
+    height: 56px;
+    filter: drop-shadow(0 2px 4px rgba(0, 63, 177, 0.2));
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   HERO TYPOGRAPHY
+   ──────────────────────────────────────────────────────────────────────── */
+
+.hero-heading {
+    font-family: 'Hanken Grotesk', sans-serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #191b23;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+}
+
+.hero-heading-highlight {
+    display: block;
+    background: linear-gradient(135deg, #003fb1 0%, #3b82f6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.hero-subtitle {
+    font-size: 0.9375rem;
+    line-height: 1.65;
+    color: #6b7280;
+    max-width: 460px;
+    margin-bottom: 28px;
+    font-weight: 400;
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   HERO TRUST BADGES
+   ──────────────────────────────────────────────────────────────────────── */
+
+.hero-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 0;
+}
+
+.hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    background: #ffffff;
+    border: 1px solid #e2e1ed;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #434654;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.hero-badge:hover {
+    border-color: #c3c5d7;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.hero-badge-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #3b82f6;
+    flex-shrink: 0;
+}
+
+.hero-badge-dot--green {
+    background: #16A34A;
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   HERO INPUT CARD (not currently used — input is in sticky bar)
+   ──────────────────────────────────────────────────────────────────────── */
+
+/* ────────────────────────────────────────────────────────────────────────
+   THINKING DOTS
+   ──────────────────────────────────────────────────────────────────────── */
+
+.thinking-dot {
+    width: 5px;
+    height: 5px;
+    background: #8B95A5;
+    border-radius: 50%;
+    animation: pulse-dot 1.4s infinite;
+}
+
+.thinking-dot:nth-child(2) { animation-delay: 0.2s; }
+.thinking-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes pulse-dot {
+    0%, 100% { opacity: 0.2; }
+    50%      { opacity: 1; }
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   MESSAGE BUBBLES
+   ──────────────────────────────────────────────────────────────────────── */
+
+.message-user {
+    animation: slideInRight 0.25s ease forwards;
+}
+
+.message-assistant {
+    animation: fadeInUp 0.3s ease forwards;
+}
+
+@keyframes slideInRight {
+    from { opacity: 0; transform: translateX(16px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.message-bubble-user {
+    background: var(--primary);
+    color: #FFFFFF;
+    border-radius: 1rem;
+    border-top-right-radius: 0;
+    box-shadow: 0 1px 3px rgba(0, 63, 177, 0.15);
+}
+
+.message-bubble-ai {
+    background: var(--surface);
+    color: var(--on-surface-variant);
+    border: 1px solid #e2e1ed;
+    border-radius: 1rem;
+    border-top-left-radius: 0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.message-bubble-ai a {
+    color: var(--primary);
+    text-decoration: underline;
+}
+
+.message-bubble-ai code {
+    background: rgba(0, 0, 0, 0.04);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.85em;
+    color: var(--on-surface);
+}
+
+.message-bubble-ai pre {
+    background: var(--surface-container-low);
+    padding: 12px;
+    border-radius: 0.75rem;
+    overflow-x: auto;
+    margin: 8px 0;
+}
+
+.message-bubble-ai ul,
+.message-bubble-ai ol {
+    padding-left: 1.5em;
+    margin: 4px 0;
+}
+
+.message-bubble-ai li { margin: 2px 0; }
+.message-bubble-ai p  { margin: 4px 0; }
+.message-bubble-ai strong { color: inherit; font-weight: 600; }
+
+/* ────────────────────────────────────────────────────────────────────────
+   TIMESTAMP
+   ──────────────────────────────────────────────────────────────────────── */
+
+.message-timestamp {
+    font-size: 11px;
+    color: var(--outline);
+    margin-top: 4px;
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   STREAMING CURSOR
+   ──────────────────────────────────────────────────────────────────────── */
+
+.streaming-cursor::after {
+    content: '\25CA';
+    animation: pulse-dot 1s infinite;
+    color: var(--primary);
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   DIAGNOSIS CARDS
+   ──────────────────────────────────────────────────────────────────────── */
+
+.diagnosis-card {
+    animation: fadeInUp 0.4s ease forwards;
+    border-radius: 1rem;
+    border-width: 1px;
+    padding: 1rem;
+    margin-top: 0.75rem;
+}
+
+.diagnosis-card.skin {
+    background: rgba(245, 158, 11, 0.06);
+    border-color: rgba(245, 158, 11, 0.2);
+    color: #B45309;
+}
+
+.diagnosis-card.ear {
+    background: rgba(249, 115, 22, 0.06);
+    border-color: rgba(249, 115, 22, 0.2);
+    color: #C2410C;
+}
+
+.diagnosis-card.eye {
+    background: rgba(59, 130, 246, 0.06);
+    border-color: rgba(59, 130, 246, 0.2);
+    color: #1D4ED8;
+}
+
+.diagnosis-card.parasite {
+    background: rgba(239, 68, 68, 0.06);
+    border-color: rgba(239, 68, 68, 0.2);
+    color: #B91C1C;
+}
+
+.diagnosis-card.digestive {
+    background: rgba(168, 85, 247, 0.06);
+    border-color: rgba(168, 85, 247, 0.2);
+    color: #7E22CE;
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   IMAGE PREVIEW
+   ──────────────────────────────────────────────────────────────────────── */
+
+.image-preview {
+    position: relative;
+    display: inline-block;
+}
+
+.image-preview img {
+    border-radius: 0.75rem;
+    border: 1px solid var(--outline-variant);
+}
+
+.image-preview .remove-btn {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 20px;
+    height: 20px;
+    background: var(--error);
+    color: #FFF;
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+}
+
+.image-preview .remove-btn:hover {
+    background: #DC2626;
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   RESPONSIVE
+   ──────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+    .hero-heading {
+        font-size: 1.5rem;
+    }
+
+    .hero-subtitle {
+        font-size: 0.8125rem;
+        max-width: 320px;
+    }
+
+    .hero-icon-inner {
+        width: 72px;
+        height: 72px;
+        border-radius: 22px;
+    }
+
+    .hero-icon-svg {
+        width: 46px;
+        height: 46px;
+    }
+
+    .hero-badges {
+        gap: 6px;
+    }
+
+    .hero-badge {
+        font-size: 0.6875rem;
+        padding: 5px 10px;
+    }
+
+    #btn-new-chat {
+        bottom: 6rem;
+        right: 1rem;
+    }
+
+    #btn-new-chat span {
+        display: none;
+    }
+
+    .message-bubble-user,
+    .message-bubble-ai {
+        max-width: 90% !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-heading {
+        font-size: 1.35rem;
+    }
+
+    .hero-subtitle {
+        font-size: 0.75rem;
+        max-width: 280px;
+    }
+
+    .hero-icon-inner {
+        width: 64px;
+        height: 64px;
+        border-radius: 18px;
+    }
+
+    .hero-icon-svg {
+        width: 40px;
+        height: 40px;
+    }
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   REDUCED MOTION
+   ──────────────────────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}

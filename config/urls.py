@@ -13,9 +13,10 @@ from apps.accounts.views import (
 )
 from apps.appointments.views import AvailableTimeSlotsView, AppointmentListCreateView
 from apps.payments.views import (
-    CreateCheckoutSessionView, 
+    CreateCheckoutSessionView,
     payment_page, payment_success, payment_cancel, stripe_webhook
 )
+from apps.chat.views_pages import ai_diagnosis_page
 
 def index(request):
     return render(request, 'home/index.html')
@@ -69,7 +70,13 @@ urlpatterns = [
     path('payment/success/', payment_success, name='payment_success'),
     path('payment/cancel/', payment_cancel, name='payment_cancel'),
     path('api/webhooks/stripe/', stripe_webhook, name='stripe_webhook'),
+
+    # AI Diagnosis
+    path('ai-diagnosis/', ai_diagnosis_page, name='ai_diagnosis_page'),
+    path('api/v1/', include('apps.chat.urls')),
+
 ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static("/uploads/", document_root=settings.UPLOAD_DIR)

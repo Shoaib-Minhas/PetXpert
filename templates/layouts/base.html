@@ -110,6 +110,10 @@
                 <i data-lucide="stethoscope" class="w-5 h-5 group-hover:text-[var(--primary)]"></i>
                 <span class="font-semibold text-sm">Vet Services</span>
             </a>
+            <a href="/ai-diagnosis/" id="nav-ai-diagnosis" class="flex items-center gap-3 px-4 py-3 text-gray-500 hover:bg-[var(--surface-container-low)] rounded-xl transition-all group">
+                <i data-lucide="brain" class="w-5 h-5 group-hover:text-[var(--primary)]"></i>
+                <span class="font-semibold text-sm">AI Diagnosis</span>
+            </a>
             <a href="/my-pets/" id="nav-pets" class="flex items-center gap-3 px-4 py-3 text-gray-500 hover:bg-[var(--surface-container-low)] rounded-xl transition-all group">
                 <i data-lucide="paw-print" class="w-5 h-5 group-hover:text-[var(--primary)]"></i>
                 <span class="font-semibold text-sm">My Pets</span>
@@ -629,14 +633,21 @@
         }
 
         const currentPath = window.location.pathname;
-        if (currentPath === '/veterinarians/') {
+        if (currentPath === '/veterinarians/' || currentPath.startsWith('/veterinarians/')) {
             const navVets = document.getElementById('nav-vets');
             if (navVets) {
                 navVets.classList.add('sidebar-item-active');
                 navVets.classList.remove('text-gray-500');
             }
         }
-        if (currentPath === '/my-pets/') {
+        if (currentPath === '/ai-diagnosis/' || currentPath.startsWith('/ai-diagnosis/')) {
+            const navAiDiag = document.getElementById('nav-ai-diagnosis');
+            if (navAiDiag) {
+                navAiDiag.classList.add('sidebar-item-active');
+                navAiDiag.classList.remove('text-gray-500');
+            }
+        }
+        if (currentPath === '/my-pets/' || currentPath.startsWith('/my-pets/')) {
             const navPets = document.getElementById('nav-pets');
             if (navPets) {
                 navPets.classList.add('sidebar-item-active');
