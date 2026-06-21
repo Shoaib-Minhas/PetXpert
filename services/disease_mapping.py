@@ -16,14 +16,29 @@ DISEASES = [
     "Digestive Issues",
 ]
 
-# Maps ViT raw class names -> our 5 standardized disease labels.
+# Maps raw class names (from EfficientNet training dataset) -> our 5 standardized disease labels.
+# These mappings are used by services/ml/efficientnet_model.py to normalize predictions.
+#
+# Current trained model classes (90.74% val accuracy):
+#   fungal_infection, glaucoma, hotspot, ringworm, tick_infestation
 IMAGE_CLASS_MAPPING = {
     # ── Skin Infection ──────────────────────────────────────────────────
+    "fungal_infection": "Skin Infection",
+    "fungal infection": "Skin Infection",
+    "hotspot": "Skin Infection",
+    "hot_spot": "Skin Infection",
+    "ringworm": "Skin Infection",
+
+    # ── Eye Infection ───────────────────────────────────────────────────
+    "glaucoma": "Eye Infection",
+
+    # ── Parasites ───────────────────────────────────────────────────────
+    "tick_infestation": "Parasites",
+
+    # ── Legacy mappings (from ViT / older datasets) ────────────────────
     "bacterial_dermatosis": "Skin Infection",
     "bacterial dermatosis": "Skin Infection",
     "feline_bacterial_infection": "Skin Infection",
-    "fungal_infection": "Skin Infection",
-    "fungal infection": "Skin Infection",
     "ringworm": "Skin Infection",
     "malassezia_dermatitis": "Skin Infection",
     "mycetomas": "Skin Infection",

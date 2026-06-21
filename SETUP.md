@@ -104,7 +104,7 @@ PetXpert/
 │   ├── rag_service.py      # Retrieval-Augmented Generation
 │   ├── disease_mapping.py  # Veterinary knowledge base
 │   └── ml/                 # Machine learning models
-│       └── image_model.py  # Vision Transformer model
+│       └── efficientnet_model.py  # EfficientNet B3/B4 classifier
 ├── templates/              # HTML templates
 │   ├── layouts/            # Base layout with sidebar
 │   ├── diagnosis/          # AI Diagnosis page
@@ -128,7 +128,7 @@ PetXpert/
 
 ## Key Features
 
-- **AI Diagnosis**: AI-powered pet health assessment with symptom analysis, image upload, and real-time SSE streaming responses via Groq API (Llama 3.3 70B + Llama 4 Scout vision)
+- **AI Diagnosis**: AI-powered pet health assessment with symptom analysis, image upload (EfficientNet B3/B4 classification), and real-time SSE streaming responses via Groq API (Llama 3.3 70B)
 - **User Authentication**: JWT-based authentication system
 - **Veterinarian Profiles**: Search and book appointments with veterinarians
 - **Pet Management**: Add and manage pet profiles with medical history
@@ -145,7 +145,7 @@ The AI Diagnosis page (`/ai-diagnosis/`) provides an AI-powered veterinary assis
 - Accepts text descriptions of pet symptoms
 - Supports image upload for visual analysis
 - Streams AI responses in real-time via Server-Sent Events (SSE)
-- Uses Groq's Llama 3.3 70B for text and Llama 4 Scout for vision
+- Uses EfficientNet B3/B4 for image classification and Groq's Llama 3.3 70B for text generation
 - Includes a veterinary knowledge base covering 5 disease categories
 - Generates structured diagnoses with treatment plans and vet urgency guidance
 - Supports RAG (Retrieval-Augmented Generation) for context-aware responses
@@ -160,16 +160,16 @@ The AI Diagnosis page (`/ai-diagnosis/`) provides an AI-powered veterinary assis
    ```
 4. Restart the development server
 
-### Optional: Image Classification Model
+### Optional: Image Classification Model (EfficientNet)
 
-For pet disease image classification, a fine-tuned ViT (Vision Transformer) model can be used:
+For pet disease image classification, a fine-tuned EfficientNet B3/B4 model is used:
 
 ```bash
-pip install torch torchvision transformers Pillow
+pip install torch torchvision Pillow
 ```
 
-Place the model checkpoint at `data/model_checkpoints/vit-pet-disease.pth`.
-The feature degrades gracefully if the model is not available.
+Place the model checkpoint at `data/model_checkpoints/efficientnet-pet-disease.pth`.
+The feature degrades gracefully if the model is not available (falls back to text-only diagnosis).
 
 ### Optional: RAG with ONNX Embeddings
 

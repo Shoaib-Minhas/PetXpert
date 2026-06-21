@@ -1,6 +1,11 @@
 """
-Chat service orchestrator — coordinates LLM, image analysis, and RAG.
+Chat service orchestrator — coordinates LLM, image analysis (EfficientNet), and RAG.
 All business logic lives here; views only handle HTTP concerns.
+
+Pipeline:
+    1. Image uploaded → EfficientNet B3/B4 → disease predictions
+    2. Predictions + user text → structured prompt → Llama 3.3 70B
+    3. LLM response parsed → structured diagnosis saved
 """
 import uuid
 
@@ -21,6 +26,17 @@ class ChatService:
     ) -> tuple[str, dict | None]:
         """
         Process a user message and return the AI response.
+
+        Args:
+            session: The chat Session model instance.
+            history: List of {"role": str, "content": str} dicts.
+            user_message: The user's text input.
+            image_analysis: Optional dict from EfficientNet inference.
+            image_path: Kept for backward compatibility — not used directly;
+                        image analysis should be done before calling this.
+
+        Returns:
+            Tuple of (assistant_response_text, diagnosis_dict_or_None)
         """
         from .llm_service import get_chat_response, parse_diagnosis_from_response
 
@@ -30,7 +46,6 @@ class ChatService:
                 history=history,
                 user_message=user_message,
                 image_analysis=image_analysis,
-                image_path=image_path,
             )
             diagnosis = parse_diagnosis_from_response(text, session.id)
             return text, diagnosis
@@ -48,7 +63,11 @@ class ChatService:
             )
 
     def analyze_image(self, image_path: str) -> dict | None:
-        """Analyze an uploaded image using the ViT model."""
+        """
+        Analyze an uploaded image using the EfficientNet model.
+
+        Returns a dict with disease predictions or None on failure.
+        """
         from .image_service import classify_image
         try:
             return classify_image(image_path)

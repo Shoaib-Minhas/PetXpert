@@ -22,6 +22,8 @@ from .serializers import (
     MessageSerializer, MessageCreateSerializer,
     DiagnosisSerializer, ChatResponseSerializer,
 )
+from services.image_service import classify_image as classify_pet_image
+from services.image_service import validate_image
 
 
 # ── Health ──────────────────────────────────────────────────────────────────
@@ -113,7 +115,15 @@ class MessageListView(ChatBaseView):
 
 
 class MessageCreateView(ChatBaseView):
-    """Send a message in a session and get the AI response."""
+    """
+    Send a message in a session and get the AI response.
+
+    Pipeline:
+        1. User uploads text + optional image
+        2. Image (if present) → EfficientNet classification → disease predictions
+        3. Disease predictions + user text → Llama 3.3 70B → natural language response
+        4. Response parsed → structured diagnosis saved
+    """
 
     def post(self, request, session_id):
         session = self.get_session(session_id)
@@ -126,25 +136,13 @@ class MessageCreateView(ChatBaseView):
         image_url = None
         image_abs_path = None
         image_analysis = None
-        image_rejected = None
 
-        # Handle image upload
+        # Handle image upload + classification
         if image and image.name:
             image_url = self._save_image(session.id, image)
             rel_path = image_url.lstrip("/")
             image_abs_path = str(Path(settings.UPLOAD_DIR).parent / rel_path)
-
-            # Validate: reject non-pet images
-            try:
-                from services.llm_service import validate_pet_image
-                is_valid, rejection_msg = validate_pet_image(image_abs_path)
-                if not is_valid:
-                    image_rejected = rejection_msg
-                else:
-                    image_analysis = self._analyze_image(image_url)
-            except Exception:
-                # If validation service is unavailable, proceed without it
-                image_analysis = self._analyze_image(image_url)
+            image_analysis = classify_pet_image(image_abs_path)
 
         # Save user message
         user_msg = Message.objects.create(
@@ -154,18 +152,6 @@ class MessageCreateView(ChatBaseView):
             image_url=image_url,
         )
         session.save()  # Update updated_at
-
-        # Handle image rejection
-        if image_rejected:
-            assistant_msg = Message.objects.create(
-                session=session,
-                role="assistant",
-                content=image_rejected,
-            )
-            return Response(ChatResponseSerializer({
-                "message": assistant_msg,
-                "diagnosis": None,
-            }).data)
 
         # Get chat history
         history = self._get_chat_history(session.id)
@@ -228,16 +214,6 @@ class MessageCreateView(ChatBaseView):
 
         return f"/uploads/{session_id}/{filename}"
 
-    def _analyze_image(self, image_url: str) -> dict | None:
-        """Classify a pet disease image using the ViT model."""
-        try:
-            from services.image_service import classify_image
-            rel_path = image_url.lstrip("/")
-            abs_path = Path(settings.UPLOAD_DIR).parent / rel_path
-            return classify_image(str(abs_path))
-        except Exception:
-            return None
-
     def _get_chat_history(self, session_id: uuid.UUID) -> list[dict]:
         """Get chat history for the LLM context."""
         messages = Message.objects.filter(session_id=session_id).order_by("created_at")
@@ -248,6 +224,10 @@ class MessageStreamView(ChatBaseView):
     """
     SSE streaming endpoint for real-time chat responses.
     Uses Django's StreamingHttpResponse for Server-Sent Events.
+
+    Pipeline:
+        1. Image (if present) → EfficientNet classification
+        2. Disease predictions + user text → Llama 3.3 70B → streamed response
     """
 
     def post(self, request, session_id):
@@ -260,21 +240,14 @@ class MessageStreamView(ChatBaseView):
         image = request.FILES.get("image")
         image_url = None
         image_abs_path = None
-        image_rejected = None
+        image_analysis = None
 
-        # Handle image
+        # Handle image upload + classification
         if image and image.name:
             image_url = self._save_image(session, image)
             rel_path = image_url.lstrip("/")
             image_abs_path = str(Path(settings.UPLOAD_DIR).parent / rel_path)
-
-            try:
-                from services.llm_service import validate_pet_image
-                is_valid, rejection_msg = validate_pet_image(image_abs_path)
-                if not is_valid:
-                    image_rejected = rejection_msg
-            except Exception:
-                pass  # Proceed without validation if service unavailable
+            image_analysis = classify_pet_image(image_abs_path)
 
         # Save user message
         Message.objects.create(
@@ -284,10 +257,6 @@ class MessageStreamView(ChatBaseView):
             image_url=image_url,
         )
         session.save()
-
-        # Handle image rejection stream
-        if image_rejected:
-            return self._build_rejection_stream(session.id, image_rejected)
 
         history = self._get_chat_history(session.id)
 
@@ -299,6 +268,7 @@ class MessageStreamView(ChatBaseView):
                     session=session,
                     history=history,
                     user_message=content,
+                    image_analysis=image_analysis,
                     image_path=image_abs_path,
                 ):
                     full_response += token
@@ -325,29 +295,6 @@ class MessageStreamView(ChatBaseView):
 
         response = StreamingHttpResponse(
             event_generator(),
-            content_type="text/event-stream",
-        )
-        response["Cache-Control"] = "no-cache"
-        response["X-Accel-Buffering"] = "no"
-        return response
-
-    def _build_rejection_stream(self, session_id: uuid.UUID, message: str):
-        """Return SSE stream for image rejection."""
-        def rejection_generator():
-            for char in message:
-                yield f"data: {json.dumps({'token': char})}\n\n"
-            try:
-                Message.objects.create(
-                    session_id=session_id,
-                    role="assistant",
-                    content=message,
-                )
-            except Exception:
-                pass
-            yield f"data: {json.dumps({'done': True})}\n\n"
-
-        response = StreamingHttpResponse(
-            rejection_generator(),
             content_type="text/event-stream",
         )
         response["Cache-Control"] = "no-cache"

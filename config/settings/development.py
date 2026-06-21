@@ -24,11 +24,8 @@ INSTALLED_APPS = [
     'apps.pets',
     'apps.diagnosis',
     'apps.chat',
-    'apps.veterinarians',
     'apps.appointments',
-    'apps.consultations',
     'apps.prescriptions',
-    'apps.notifications',
     'apps.payments',
     'rest_framework',
     'rest_framework_simplejwt',
@@ -117,13 +114,19 @@ STRIPE_WEBHOOK_SECRET = config('STRIPE_WEBHOOK_SECRET', default='whsec_placehold
 
 # ── AI Diagnosis / Chat Settings ──────────────────────────────────────────
 
-# Groq API
+# Groq API (Llama 3.3 70B for text generation)
 GROQ_API_KEY = config('GROQ_API_KEY', default='')
 GROQ_MODEL = config('GROQ_MODEL', default='llama-3.3-70b-versatile')
 
-# Image Model (ViT)
-IMAGE_MODEL_NAME = config('IMAGE_MODEL_NAME', default='google/vit-base-patch16-224-in21k')
-IMAGE_MODEL_PATH = config('IMAGE_MODEL_PATH', default=str(BASE_DIR / 'data' / 'model_checkpoints' / 'vit-pet-disease.pth'))
+# EfficientNet Model (pet disease image classification)
+# Options: 'efficientnet-b3' or 'efficientnet-b4'
+EFFICIENTNET_VARIANT = config('EFFICIENTNET_VARIANT', default='efficientnet-b4')
+EFFICIENTNET_NUM_CLASSES = int(config('EFFICIENTNET_NUM_CLASSES', default='5'))
+EFFICIENTNET_MODEL_PATH = config(
+    'EFFICIENTNET_MODEL_PATH',
+    default=str(BASE_DIR / 'data' / 'model_checkpoints' / 'efficientnet-pet-disease.pth')
+)
+EFFICIENTNET_IMAGE_SIZE = int(config('EFFICIENTNET_IMAGE_SIZE', default='380'))
 DEVICE = config('DEVICE', default='cpu')
 
 # LLM Settings

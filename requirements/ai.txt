@@ -1,0 +1,19 @@
+# ── AI / ML Dependencies ───────────────────────────────────────────────────
+# Install: pip install -r requirements/ai.txt
+
+# PyTorch — CPU-only
+torch>=2.0.0
+torchvision>=0.15.0
+
+# EfficientNet via timm (better pretrained weights — used by the proven notebook)
+timm>=0.9.0
+
+# Data splitting
+scikit-learn>=1.3.0
+
+# Image handling
+Pillow>=10.0.0
+numpy>=1.24.0
+
+# Groq API client (Llama 3.3 70B text generation)
+groq>=0.8.0

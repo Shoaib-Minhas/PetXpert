@@ -231,14 +231,6 @@ def stripe_webhook(request):
                     paid_at=datetime.now()
                 )
                 
-                # Create notification (optional)
-                # from apps.notifications.models import Notification
-                # Notification.objects.create(
-                #     user=user,
-                #     title='Appointment Confirmed',
-                #     message=f'Your appointment has been confirmed successfully.'
-                # )
-                
             except User.DoesNotExist:
                 # User not found, log error
                 pass

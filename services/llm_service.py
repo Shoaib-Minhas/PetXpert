@@ -1,39 +1,31 @@
 """
 Groq API integration for the VetAI chatbot.
-Uses Llama 3.3 70B for text and Llama 4 Scout (multimodal) for image+text.
+Uses Llama 3.3 70B for text generation. Image analysis is handled by
+the EfficientNet pipeline (see services/image_service.py) and its output
+is injected into the prompt as structured context before reaching the LLM.
 
-Ported from FastAPI async to Django-compatible synchronous functions.
+Architecture:
+    Image → EfficientNet B3/B4 → disease predictions (JSON)
+    Text + disease predictions → structured prompt → Llama 3.3 70B → natural language diagnosis
 """
 import re
 import uuid
-import base64
-from pathlib import Path
 from django.conf import settings
 from .disease_mapping import DISEASE_KNOWLEDGE_BASE, DISEASES
 
 _client = None  # Groq client — lazily initialized
 
-# Models
 TEXT_MODEL = "llama-3.3-70b-versatile"
-VISION_MODEL = "meta-llama/llama-4-scout-17b-16e-instruct"
-
-# Rejection messages
-REJECTION_NO_PET = (
-    "I am a veterinary assistant and can only help with pet health, pet symptoms, "
-    "animal diseases, pet care, and veterinary-related questions. Please describe "
-    "your pet's symptoms or upload an image of your pet."
-)
-REJECTION_NO_SKIN = "Please upload a clearer image showing the affected skin area."
 
 SYSTEM_PROMPT = """You are VetAI, a friendly and knowledgeable veterinary assistant. You help pet owners with health questions, symptoms, and pet care advice. You are conversational, warm, and always helpful — even when users go off-topic.
 
 # ⛔ CRITICAL: INTERNAL REASONING IS FORBIDDEN IN OUTPUT ⛔
 
 The sections below (marked [INTERNAL]) describe your THINKING PROCESS. They are NOT part of your response. You must NEVER output:
-- Step labels like "STEP 0", "STEP 1", "STEP 2", "IMAGE VALIDATION PASSED", "CLASSIFY INTENT"
+- Step labels like "STEP 0", "STEP 1", "STEP 2", "IMAGE ANALYSIS RESULT"
 - Checkmarks, validation status, or thinking commentary
 - Any meta-commentary about what step you're on
-- Phrases like "Based on the image validation step" or "After classifying the intent"
+- Phrases like "Based on the image analysis" or "After classifying the intent"
 
 Your response must go DIRECTLY to the final output — a casual reply, a friendly redirect, or a health concern analysis. Nothing else.
 
@@ -41,32 +33,24 @@ Your response must go DIRECTLY to the final output — a casual reply, a friendl
 
 [INTERNAL — THINK SILENTLY, NEVER OUTPUT]
 
-IMAGE VALIDATION (when an image is uploaded):
-
-1. Does the image contain a dog, cat, or other pet animal (rabbit, bird, etc.)?
-   - If NO → Your ENTIRE response must be EXACTLY: "I am a veterinary assistant and can only help with pet health, pet symptoms, animal diseases, pet care, and veterinary-related questions. Please describe your pet's symptoms or upload an image of your pet."
-   - Do NOT describe the image. Do NOT make a joke. Do NOT add anything else.
-
-2. If a pet IS present, is the skin/fur/affected area clearly visible?
-   - If NOT clearly visible → Your ENTIRE response must be EXACTLY: "Please upload a clearer image showing the affected skin area."
-
-3. Only proceed if BOTH: pet clearly present AND skin/affected area clearly visible.
-
 INTENT CLASSIFICATION:
 
 - OFF-TOPIC TEXT — message has nothing to do with pets, animals, or veterinary topics. Examples: "yeh chair kaisi hai", "what's the weather like", "tell me a recipe".
 - JOKE / SARCASM / PLAYFUL — pet-related humor. Examples: "my goldfish has anxiety", "my cat is plotting to kill me".
 - GENERAL CHAT — casual pet-related conversation. Examples: "hello", "tell me a fun fact about dogs", "what breed is best for apartments", "okay thanks".
-- GENUINE HEALTH CONCERN — symptoms described or validated pet image uploaded.
+- GENUINE HEALTH CONCERN — symptoms described or image analysis results provided.
+
+WHEN IMAGE ANALYSIS IS PROVIDED:
+The user's message includes a [IMAGE ANALYSIS] section from our specialized pet disease classifier (EfficientNet).
+This is a computer vision model fine-tuned on pet diseases. Trust its predictions as a strong signal.
+Weave the disease predictions naturally into your explanation — do NOT create a separate "Image Analysis" heading.
+Always mention: "Based on the image..." or "The photo shows signs of..." to acknowledge the visual input.
 
 [/INTERNAL]
 
 ---
 
 RESPOND DIRECTLY — pick ONE of the modes below:
-
-### IF REJECTING AN IMAGE:
-Respond with EXACTLY the rejection message and nothing else. This rule applies ONLY to uploaded images — never use the rejection message for text-only messages.
 
 ### IF OFF-TOPIC TEXT (text only, no image):
 The user said something completely unrelated to pets or animals. Respond naturally and briefly — acknowledge their message in a friendly way, then gently steer back to pet health. Keep it to 1-2 sentences. Be warm, not robotic. Vary your responses — NEVER repeat the same redirection message.
@@ -76,7 +60,7 @@ Examples of good off-topic responses:
 - "I'm not much help with that topic, but if your pet is showing any symptoms or you need care advice, I'd love to help!"
 - "I focus on pet health, so I can't help much with that one. Is there anything about your pet you'd like to discuss?"
 
-⛔ CRITICAL: For off-topic TEXT messages, NEVER use the image rejection message ("I am a veterinary assistant and can only help with pet health..."). That message is ONLY for non-pet IMAGES. Using it for text messages makes you sound broken.
+⛔ CRITICAL: For off-topic TEXT messages, NEVER use the image rejection message ("I am a veterinary assistant and can only help with pet health..."). That verbiage is ONLY for images that fail validation (handled before reaching you).
 
 ### IF JOKE / SARCASM / PLAYFUL (text only, never images):
 Play along. Keep it short — 1 to 3 lines max. No medical advice.
@@ -84,14 +68,14 @@ Play along. Keep it short — 1 to 3 lines max. No medical advice.
 ### IF GENERAL CHAT:
 Be friendly and conversational. Answer naturally. No medical structure. This includes greetings, thank-yous, follow-ups, and casual pet questions. Match the user's tone.
 
-### IF GENUINE HEALTH CONCERN:
+### IF GENUINE HEALTH CONCERN (with or without image analysis):
 Act as a knowledgeable veterinary assistant. Rules:
 
 1. ⚠️ You are NOT a replacement for a licensed veterinarian. No generic disclaimer — the UI handles that.
 2. If symptoms suggest an emergency (difficulty breathing, seizures, severe bleeding, collapse, inability to urinate, distended/bloated abdomen, paralysis), flag it IMMEDIATELY.
 3. 🚫 BIOLOGICAL REALITY CHECK — correct biologically impossible claims. Examples: rabbits cannot vomit, horses cannot vomit, cats are obligate carnivores, birds excrete urates with feces, rats/mice/guinea pigs cannot vomit.
 4. Ask 2-3 clarifying questions before giving advice.
-5. When an image was uploaded, weave observations naturally into your explanation — no separate "Image Observations" heading.
+5. When image analysis results are provided, weave them naturally into your explanation.
 6. Be specific — name actual conditions.
 7. Focus on the most likely issue.
 
@@ -122,12 +106,7 @@ DISEASES YOU COVER (in detail):
 {disease_knowledge}
 
 GUARDRAILS:
-- 🚨 For non-pet IMAGES only: respond with EXACTLY the rejection message. Never use this rejection for text.
-- 🚨 REJECT unclear pet images with EXACTLY: "Please upload a clearer image showing the affected skin area."
-- For off-topic TEXT: respond naturally and briefly, then gently redirect. Vary your wording each time. Never repeat the same message.
-- NEVER output your internal thinking/steps/validation process.
-- NEVER describe furniture, people, cars, landscapes, or any non-pet object in an uploaded image.
-- When in doubt about an image → REJECT it.
+- NEVER output your internal thinking/steps/classification process.
 - When in doubt about text → treat it as GENERAL CHAT and respond conversationally.
 """
 
@@ -158,61 +137,38 @@ def _build_system_prompt() -> str:
     return SYSTEM_PROMPT.format(disease_knowledge="\n\n".join(kb_parts))
 
 
-def _encode_image_to_base64(image_path: str) -> str:
-    """Read an image file and return a base64 data URI."""
-    with open(image_path, "rb") as f:
-        img_bytes = f.read()
-    ext = Path(image_path).suffix.lower().lstrip(".")
-    mime = {"jpg": "jpeg", "jpeg": "jpeg", "png": "png", "webp": "webp"}.get(ext, "jpeg")
-    b64 = base64.b64encode(img_bytes).decode("utf-8")
-    return f"data:image/{mime};base64,{b64}"
-
-
-def validate_pet_image(image_path: str) -> tuple[bool, str | None]:
+def _build_user_message(
+    user_message: str,
+    image_analysis: dict | None = None,
+) -> str:
     """
-    Pre-check: does this image contain a pet animal with visible skin/fur?
-
-    Uses a minimal Groq vision call (max_tokens=5, temperature=0) as a fast
-    gatekeeper BEFORE the main conversational LLM call.
-
-    Returns:
-        (is_valid, rejection_message)
-        - (True, None)  → animal with visible skin/fur detected, proceed
-        - (False, msg)  → no animal or unclear, reject immediately
+    Build the final user message for the LLM.
+    Injects EfficientNet image analysis as structured context when available.
     """
-    try:
-        client = _get_client()
-        image_uri = _encode_image_to_base64(image_path)
+    if not image_analysis:
+        return user_message
 
-        completion = client.chat.completions.create(
-            model=VISION_MODEL,
-            messages=[{
-                "role": "user",
-                "content": [
-                    {
-                        "type": "text",
-                        "text": (
-                            "Look at this image. Is there a dog, cat, or other pet animal "
-                            "(rabbit, bird, etc.) with visible skin or fur in this image? "
-                            "Answer ONLY 'YES' or 'NO'. Do not say anything else."
-                        ),
-                    },
-                    {"type": "image_url", "image_url": {"url": image_uri}},
-                ],
-            }],
-            temperature=0,
-            max_tokens=5,
-        )
+    # Build structured image analysis block
+    disease = image_analysis.get("disease", "Unknown")
+    raw_class = image_analysis.get("raw_class", disease)
+    confidence = image_analysis.get("confidence", 0.0)
+    top_predictions = image_analysis.get("top_predictions", [])
 
-        answer = completion.choices[0].message.content.strip().upper()
-        if answer.startswith("YES"):
-            return True, None
-        else:
-            return False, REJECTION_NO_PET
+    analysis_block = (
+        f"\n\n[IMAGE ANALYSIS — from EfficientNet pet disease classifier]\n"
+        f"Primary finding: {raw_class} → {disease} (confidence: {confidence:.2f})\n"
+    )
+    if top_predictions:
+        analysis_block += "Differential diagnoses:\n"
+        for i, pred in enumerate(top_predictions, 1):
+            raw = pred.get("raw_class", pred["disease"])
+            analysis_block += f"  {i}. {raw} → {pred['disease']} ({pred['confidence']:.2f})\n"
+    analysis_block += (
+        f"\nUse this as a strong reference. Weave these findings naturally "
+        f"into your assessment alongside the user's described symptoms."
+    )
 
-    except Exception as e:
-        print(f"[validate_pet_image] Validation call failed, allowing through: {e}")
-        return True, None
+    return user_message + analysis_block
 
 
 def stream_chat_response(
@@ -225,6 +181,15 @@ def stream_chat_response(
     """
     Stream the Groq response — yields text chunks as they arrive.
     Synchronous generator function for Django SSE.
+
+    Args:
+        session: The chat Session model instance.
+        history: List of {"role": str, "content": str} dicts.
+        user_message: The user's text input.
+        image_analysis: Optional dict from EfficientNet inference with
+                        {"disease", "confidence", "top_predictions"}.
+        image_path: Ignored — kept for backward compatibility with callers.
+                    Image analysis is now done via EfficientNet before reaching here.
     """
     client = _get_client()
     system_prompt = _build_system_prompt()
@@ -246,51 +211,15 @@ def stream_chat_response(
     for msg in history[-20:]:
         messages.append({"role": msg["role"], "content": msg["content"]})
 
-    if image_path:
-        try:
-            image_uri = _encode_image_to_base64(image_path)
-            validation_text = (
-                "⚠️ IMAGE ATTACHED — VALIDATE FIRST:\n"
-                "Before anything else, check: does this image contain a pet animal "
-                "(dog, cat, rabbit, bird) with visible skin or fur?\n"
-                "→ If NO animal is present: respond ONLY with \"I am a veterinary assistant "
-                "and can only help with pet health, pet symptoms, animal diseases, pet care, "
-                "and veterinary-related questions. Please describe your pet's symptoms or "
-                "upload an image of your pet.\"\n"
-                "→ If animal present but skin/fur NOT clearly visible: respond ONLY with "
-                "\"Please upload a clearer image showing the affected skin area.\"\n"
-                "→ ONLY if a pet with visible skin/fur is clearly present, proceed with analysis.\n"
-                "DO NOT describe chairs, furniture, people, cars, landscapes, or any non-pet object.\n\n"
-            )
-            user_text = validation_text + (user_message or "Please analyze this pet image.")
-            user_content = [
-                {"type": "text", "text": user_text},
-                {"type": "image_url", "image_url": {"url": image_uri}},
-            ]
-            messages.append({"role": "user", "content": user_content})
-            model = VISION_MODEL
-            max_t = max(settings.LLM_MAX_TOKENS, 4096)
-        except Exception:
-            messages.append({"role": "user", "content": user_message})
-            model = TEXT_MODEL
-            max_t = settings.LLM_MAX_TOKENS
-    else:
-        augmented = user_message
-        if image_analysis:
-            augmented = (
-                f"{user_message}\n\n"
-                f"[The uploaded image appears to show signs of {image_analysis['disease']}. "
-                f"Use this as a reference point but make your own assessment based on what you see.]"
-            )
-        messages.append({"role": "user", "content": augmented})
-        model = TEXT_MODEL
-        max_t = settings.LLM_MAX_TOKENS
+    # Build user message with optional image analysis
+    augmented = _build_user_message(user_message, image_analysis)
+    messages.append({"role": "user", "content": augmented})
 
     stream = client.chat.completions.create(
-        model=model,
+        model=TEXT_MODEL,
         messages=messages,
         temperature=settings.LLM_TEMPERATURE,
-        max_tokens=max_t,
+        max_tokens=settings.LLM_MAX_TOKENS,
         stream=True,
     )
 
@@ -309,6 +238,13 @@ def get_chat_response(
     """
     Send the conversation to Groq and return the assistant's response.
     Synchronous version for Django compatibility.
+
+    Args:
+        session: The chat Session model instance.
+        history: List of {"role": str, "content": str} dicts.
+        user_message: The user's text input.
+        image_analysis: Optional dict from EfficientNet inference.
+        image_path: Ignored — kept for backward compatibility.
     """
     client = _get_client()
     system_prompt = _build_system_prompt()
@@ -334,49 +270,14 @@ def get_chat_response(
     for msg in history[-20:]:
         messages.append({"role": msg["role"], "content": msg["content"]})
 
-    if image_path:
-        try:
-            image_uri = _encode_image_to_base64(image_path)
-            validation_text = (
-                "⚠️ IMAGE ATTACHED — VALIDATE FIRST:\n"
-                "Before anything else, check: does this image contain a pet animal "
-                "(dog, cat, rabbit, bird) with visible skin or fur?\n"
-                "→ If NO animal is present: respond ONLY with \"I am a veterinary assistant "
-                "and can only help with pet health, pet symptoms, animal diseases, pet care, "
-                "and veterinary-related questions. Please describe your pet's symptoms or "
-                "upload an image of your pet.\"\n"
-                "→ If animal present but skin/fur NOT clearly visible: respond ONLY with "
-                "\"Please upload a clearer image showing the affected skin area.\"\n"
-                "→ ONLY if a pet with visible skin/fur is clearly present, proceed with analysis.\n"
-                "DO NOT describe chairs, furniture, people, cars, landscapes, or any non-pet object.\n\n"
-            )
-            user_text = validation_text + (user_message or "Please analyze this pet image.")
-            user_content = [
-                {"type": "text", "text": user_text},
-                {"type": "image_url", "image_url": {"url": image_uri}},
-            ]
-            messages.append({"role": "user", "content": user_content})
-            model = VISION_MODEL
-        except Exception:
-            messages.append({"role": "user", "content": user_message})
-            model = TEXT_MODEL
-    else:
-        augmented_message = user_message
-        if image_analysis:
-            augmented_message = (
-                f"{user_message}\n\n"
-                f"[The uploaded image appears to show signs of {image_analysis['disease']}. "
-                f"Use this as a reference point but make your own assessment based on what you see.]"
-            )
-        messages.append({"role": "user", "content": augmented_message})
-        model = TEXT_MODEL
+    augmented = _build_user_message(user_message, image_analysis)
+    messages.append({"role": "user", "content": augmented})
 
-    max_tokens = settings.LLM_MAX_TOKENS if not image_path else max(settings.LLM_MAX_TOKENS, 4096)
     completion = client.chat.completions.create(
-        model=model,
+        model=TEXT_MODEL,
         messages=messages,
         temperature=settings.LLM_TEMPERATURE,
-        max_tokens=max_tokens,
+        max_tokens=settings.LLM_MAX_TOKENS,
     )
 
     return completion.choices[0].message.content

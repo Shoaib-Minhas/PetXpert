@@ -19,6 +19,9 @@ venv/
 media/
 uploads/
 
+# Data / Model checkpoints
+data/
+
 # IDE
 .vscode/
 .idea/
